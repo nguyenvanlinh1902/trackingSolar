@@ -2,7 +2,14 @@
  * Analytics Service - Integrates with Shopable analytics API
  */
 
-import type { Store, PerStoreMetricsData } from '@/types/survey-metrics';
+import type {
+  Store,
+  PerStoreMetricsData,
+  SurveyMetricsData,
+  VideoSourceMetrics,
+  WidgetUsageMetrics,
+  RevenueMetrics,
+} from '@/types/survey-metrics';
 
 export type PeriodType = 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH';
 
@@ -388,4 +395,203 @@ export async function getPerStoreMetrics(
     console.error('Failed to fetch per store metrics:', error);
     return { ...mockPerStoreMetrics, storeId, storeName: fallbackStoreName };
   }
+}
+
+// ===== ALL STORES SURVEY METRICS =====
+
+// Mock data for All Stores survey metrics
+const mockSurveyMetrics: SurveyMetricsData = {
+  videoSource: {
+    tiktok: 450,
+    instagram: 350,
+    upload: 200,
+    total: 1000,
+  },
+  widgetUsage: {
+    widgetTypes: [
+      { type: 'Basic carousel', count: 120 },
+      { type: 'Highlighted carousel', count: 85 },
+      { type: 'Grid', count: 200 },
+      { type: 'Float', count: 150 },
+      { type: 'Story', count: 95 },
+    ],
+    avgWidgetsPerMerchant: 12.5,
+    avgActiveWidgetsPerMerchant: 8.2,
+    ctaActions: [
+      { action: 'Open product detail page', count: 320 },
+      { action: 'Show product detail within the modal', count: 180 },
+      { action: 'Add to cart (no page change)', count: 250 },
+      { action: 'Add to cart and open cart page', count: 150 },
+    ],
+  },
+  revenue: {
+    inVideo: {
+      value: 12500,
+      previousValue: 10200,
+      change: 2300,
+      changePercent: 22.5,
+      timeSeries: [
+        { date: '2024-12-09', value: 1200 },
+        { date: '2024-12-10', value: 1850 },
+        { date: '2024-12-11', value: 2100 },
+        { date: '2024-12-12', value: 1680 },
+        { date: '2024-12-13', value: 2450 },
+        { date: '2024-12-14', value: 1800 },
+        { date: '2024-12-15', value: 1500 },
+      ],
+    },
+    postVideo: {
+      value: 8500,
+      previousValue: 7200,
+      change: 1300,
+      changePercent: 18.1,
+      timeSeries: [
+        { date: '2024-12-09', value: 800 },
+        { date: '2024-12-10', value: 1200 },
+        { date: '2024-12-11', value: 1500 },
+        { date: '2024-12-12', value: 1100 },
+        { date: '2024-12-13', value: 1800 },
+        { date: '2024-12-14', value: 1300 },
+        { date: '2024-12-15', value: 1000 },
+      ],
+    },
+  },
+};
+
+/**
+ * Get video source metrics for all stores
+ */
+export async function getVideoSourceMetrics(
+  period: PeriodType = 'THIS_WEEK',
+  shopDomain?: string
+): Promise<VideoSourceMetrics> {
+  const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
+
+  if (!baseUrl) {
+    console.log('Using mock video source data (VITE_SHOPABLE_API_URL not set)');
+    return mockSurveyMetrics.videoSource;
+  }
+
+  try {
+    const response = await fetch(
+      `${baseUrl}/admin/api/v1/analytics/stats/video-source?period=${period}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Api-Key': adminApiKey,
+          ...(shopDomain && { 'X-Shop-Domain': shopDomain }),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Video source API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Failed to fetch video source metrics:', error);
+    return mockSurveyMetrics.videoSource;
+  }
+}
+
+/**
+ * Get widget usage metrics for all stores
+ */
+export async function getWidgetUsageMetrics(
+  period: PeriodType = 'THIS_WEEK',
+  shopDomain?: string
+): Promise<WidgetUsageMetrics> {
+  const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
+
+  if (!baseUrl) {
+    console.log('Using mock widget usage data (VITE_SHOPABLE_API_URL not set)');
+    return mockSurveyMetrics.widgetUsage;
+  }
+
+  try {
+    const response = await fetch(
+      `${baseUrl}/admin/api/v1/analytics/stats/widget-usage?period=${period}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Api-Key': adminApiKey,
+          ...(shopDomain && { 'X-Shop-Domain': shopDomain }),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Widget usage API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Failed to fetch widget usage metrics:', error);
+    return mockSurveyMetrics.widgetUsage;
+  }
+}
+
+/**
+ * Get revenue metrics for all stores
+ */
+export async function getRevenueMetrics(
+  period: PeriodType = 'THIS_WEEK',
+  shopDomain?: string
+): Promise<{ inVideo: RevenueMetrics; postVideo: RevenueMetrics }> {
+  const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
+
+  if (!baseUrl) {
+    console.log('Using mock revenue data (VITE_SHOPABLE_API_URL not set)');
+    return mockSurveyMetrics.revenue;
+  }
+
+  try {
+    const response = await fetch(
+      `${baseUrl}/admin/api/v1/analytics/stats/revenue?period=${period}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Api-Key': adminApiKey,
+          ...(shopDomain && { 'X-Shop-Domain': shopDomain }),
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Revenue API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error('Failed to fetch revenue metrics:', error);
+    return mockSurveyMetrics.revenue;
+  }
+}
+
+/**
+ * Get all stores metrics (combined)
+ * Fetches video source, widget usage, and revenue metrics in parallel
+ */
+export async function getAllStoresMetrics(
+  period: PeriodType = 'THIS_WEEK',
+  shopDomain?: string
+): Promise<SurveyMetricsData> {
+  const [videoSource, widgetUsage, revenue] = await Promise.all([
+    getVideoSourceMetrics(period, shopDomain),
+    getWidgetUsageMetrics(period, shopDomain),
+    getRevenueMetrics(period, shopDomain),
+  ]);
+
+  return {
+    videoSource,
+    widgetUsage,
+    revenue,
+  };
 }

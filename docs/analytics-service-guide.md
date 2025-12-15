@@ -414,5 +414,124 @@ function PerStoreDashboardContent() {
 
 ---
 
-**Version**: 1.1.0
+## All Stores Metrics Functions
+
+### getVideoSourceMetrics(period?, shopDomain?)
+
+Fetches video source distribution for all stores combined.
+
+**Parameters**:
+- `period` (PeriodType, optional): `'THIS_WEEK'` | `'LAST_WEEK'` | `'THIS_MONTH'` | `'LAST_MONTH'` (default: `'THIS_WEEK'`)
+- `shopDomain` (string, optional): Shop domain for authentication
+
+**Returns**: `Promise<VideoSourceMetrics>`
+
+**Endpoint**: `GET /admin/api/v1/analytics/stats/video-source?period={period}`
+
+**Example**:
+```typescript
+const videoMetrics = await getVideoSourceMetrics('THIS_WEEK')
+// Returns: { tiktok: 450, instagram: 350, upload: 200, total: 1000 }
+```
+
+---
+
+### getWidgetUsageMetrics(period?, shopDomain?)
+
+Fetches widget usage aggregated across all stores.
+
+**Parameters**:
+- `period` (PeriodType, optional): Time period for analytics (default: `'THIS_WEEK'`)
+- `shopDomain` (string, optional): Shop domain for authentication
+
+**Returns**: `Promise<WidgetUsageMetrics>`
+
+**Endpoint**: `GET /admin/api/v1/analytics/stats/widget-usage?period={period}`
+
+**Example**:
+```typescript
+const widgetMetrics = await getWidgetUsageMetrics('THIS_WEEK')
+// Returns widget types, avg metrics, and CTA actions
+```
+
+---
+
+### getRevenueMetrics(period?, shopDomain?)
+
+Fetches revenue metrics for all stores (in-video and post-video).
+
+**Parameters**:
+- `period` (PeriodType, optional): Time period for analytics (default: `'THIS_WEEK'`)
+- `shopDomain` (string, optional): Shop domain for authentication
+
+**Returns**: `Promise<{ inVideo: RevenueMetrics; postVideo: RevenueMetrics }>`
+
+**Endpoint**: `GET /admin/api/v1/analytics/stats/revenue?period={period}`
+
+---
+
+### getAllStoresMetrics(period?, shopDomain?)
+
+Fetches combined all-stores metrics (video source, widget usage, revenue) in parallel.
+
+**Parameters**:
+- `period` (PeriodType, optional): Time period for analytics (default: `'THIS_WEEK'`)
+- `shopDomain` (string, optional): Shop domain for authentication
+
+**Returns**: `Promise<SurveyMetricsData>`
+
+**Example**:
+```typescript
+const allMetrics = await getAllStoresMetrics('THIS_WEEK')
+
+// allMetrics.videoSource -> Distribution across sources
+// allMetrics.widgetUsage -> Widget types, CTA actions, avg metrics
+// allMetrics.revenue -> In-video and post-video revenue with time series
+```
+
+---
+
+## All Stores Data Structures
+
+### WidgetTypeCount
+```typescript
+interface WidgetTypeCount {
+  type: string;       // e.g., "Basic carousel", "Grid", "Float"
+  count: number;      // Widget count of this type
+}
+```
+
+### CTAActionCount
+```typescript
+interface CTAActionCount {
+  action: string;     // e.g., "Open product detail page"
+  count: number;      // Number of this CTA type in use
+}
+```
+
+### WidgetUsageMetrics
+```typescript
+interface WidgetUsageMetrics {
+  widgetTypes: WidgetTypeCount[];              // Distribution of widget types
+  avgWidgetsPerMerchant: number;               // Average widgets per store
+  avgActiveWidgetsPerMerchant: number;         // Average active widgets per store
+  ctaActions: CTAActionCount[];                // CTA action distribution
+}
+```
+
+### SurveyMetricsData
+```typescript
+interface SurveyMetricsData {
+  videoSource: VideoSourceMetrics;             // Video distribution
+  widgetUsage: WidgetUsageMetrics;             // Widget metrics
+  revenue: {
+    inVideo: RevenueMetrics;                   // In-video revenue with time series
+    postVideo: RevenueMetrics;                 // Post-video revenue with time series
+  };
+}
+```
+
+---
+
+**Version**: 1.2.0
 **Last Updated**: 2025-12-15

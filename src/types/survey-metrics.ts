@@ -68,3 +68,35 @@ export interface Store {
   name: string;
   domain: string;
 }
+
+// ===== ALL STORES METRICS TYPES =====
+
+// Widget type usage count
+export interface WidgetTypeCount {
+  type: string;
+  count: number;
+}
+
+// CTA action usage count
+export interface CTAActionCount {
+  action: string;
+  count: number;
+}
+
+// Widget usage metrics for all stores
+export interface WidgetUsageMetrics {
+  widgetTypes: WidgetTypeCount[];
+  avgWidgetsPerMerchant: number;
+  avgActiveWidgetsPerMerchant: number;
+  ctaActions: CTAActionCount[];
+}
+
+// All Stores metrics data structure
+export interface SurveyMetricsData {
+  videoSource: VideoSourceMetrics;
+  widgetUsage: WidgetUsageMetrics;
+  revenue: {
+    inVideo: RevenueMetrics;
+    postVideo: RevenueMetrics;
+  };
+}
