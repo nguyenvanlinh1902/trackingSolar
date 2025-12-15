@@ -1,0 +1,105 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.home {
+  min-height: 100vh;
+  background: $gradient-hero;
+  @include flex-column;
+  position: relative;
+  overflow: hidden;
+
+  &__scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    @include flex-column;
+    min-height: 100vh;
+  }
+
+  &__hero {
+    flex: 1;
+    @include flex-column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-3xl $spacing-xl;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: clamp(36px, 8vw, 64px);
+    font-weight: $font-extrabold;
+    color: $white;
+    margin-bottom: $spacing-xl;
+    line-height: 1.1;
+    max-width: 800px;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  &__subtitle {
+    font-size: clamp(16px, 3vw, 20px);
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 40px;
+    max-width: 600px;
+    line-height: 1.6;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-lg;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__btn-primary {
+    padding: $spacing-lg $spacing-2xl;
+    background: $white;
+    color: #667eea;
+    border-radius: $radius-lg;
+    border: none;
+    font-weight: $font-semibold;
+    font-size: $text-lg;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    transition: all $transition-normal;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &__btn-secondary {
+    padding: $spacing-lg $spacing-2xl;
+    background: rgba(255, 255, 255, 0.15);
+    color: $white;
+    border-radius: $radius-lg;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-weight: $font-semibold;
+    font-size: $text-lg;
+    transition: all $transition-normal;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+  }
+
+  &__footer {
+    padding: $spacing-xl;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: $text-base;
+  }
+}

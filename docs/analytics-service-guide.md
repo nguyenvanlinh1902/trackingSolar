@@ -258,5 +258,161 @@ curl -H "X-Shop-Domain: myshop.shopable.com" \
 
 ---
 
-**Version**: 1.0.0
+## Per-Store Metrics Functions
+
+### getStores()
+
+Fetches list of stores accessible to the current user.
+
+**Returns**: `Promise<Store[]>`
+
+**Endpoint**: `GET /admin/api/v1/analytics/stores`
+
+**Headers**:
+```typescript
+{
+  'Content-Type': 'application/json',
+  'X-Admin-Api-Key': <adminApiKey>
+}
+```
+
+**Example**:
+```typescript
+const stores = await getStores()
+// Returns: [{id: '1', name: 'Fashion Hub', domain: 'fashion-hub.myshopify.com'}, ...]
+```
+
+---
+
+### getPerStoreMetrics(storeId, period?, shopDomain?)
+
+Fetches comprehensive metrics for a specific store.
+
+**Parameters**:
+- `storeId` (string, required): Store identifier
+- `period` (PeriodType, optional): `'THIS_WEEK'` | `'LAST_WEEK'` | `'THIS_MONTH'` | `'LAST_MONTH'` (default: `'THIS_WEEK'`)
+- `shopDomain` (string, optional): Shop domain for authentication
+
+**Returns**: `Promise<PerStoreMetricsData>`
+
+**Endpoint**: `GET /admin/api/v1/analytics/stats/shop/{storeId}?period={period}`
+
+**Example**:
+```typescript
+const metrics = await getPerStoreMetrics('store-123', 'THIS_WEEK')
+
+// metrics.videoSource: {tiktok, instagram, upload, total}
+// metrics.conversion: {ordersFromShopvid, atcRateMobile, atcRateDesktop, cvr}
+// metrics.widgetUsage: {activeWidgets, timeSeries}
+// metrics.revenue: {inVideo, postVideo}
+```
+
+---
+
+## Per-Store Data Structures
+
+### Store
+```typescript
+interface Store {
+  id: string              // Store identifier
+  name: string            // Store display name
+  domain: string          // Store domain (e.g., 'shop.myshopify.com')
+}
+```
+
+### PerStoreMetricsData
+```typescript
+interface PerStoreMetricsData {
+  storeId: string                        // Store identifier
+  storeName: string                      // Store name
+  videoSource: VideoSourceMetrics        // Video distribution by source
+  widgetUsage: PerStoreWidgetUsage      // Active widget metrics
+  conversion: ConversionMetrics          // Conversion rate metrics
+  revenue: {
+    inVideo: RevenueMetrics              // Revenue from in-video conversions
+    postVideo: RevenueMetrics            // Revenue from post-video conversions
+  }
+}
+```
+
+### VideoSourceMetrics
+```typescript
+interface VideoSourceMetrics {
+  tiktok: number         // TikTok video count
+  instagram: number      // Instagram video count
+  upload: number         // Uploaded video count
+  total: number          // Total videos
+}
+```
+
+### ConversionMetrics
+```typescript
+interface ConversionMetrics {
+  ordersFromShopvid: MetricWithTimeSeries   // Orders attributed to ShopVid
+  atcRateMobile: MetricWithTimeSeries       // Add-to-cart rate (mobile)
+  atcRateDesktop: MetricWithTimeSeries      // Add-to-cart rate (desktop)
+  cvr: MetricWithTimeSeries                 // Conversion rate
+}
+```
+
+### MetricWithTimeSeries
+```typescript
+interface MetricWithTimeSeries extends MetricWithChange {
+  timeSeries: TimeSeriesDataPoint[]     // Daily values over period
+}
+```
+
+### PerStoreWidgetUsage
+```typescript
+interface PerStoreWidgetUsage {
+  activeWidgets: number                    // Current active widgets
+  activeWidgetsPrevious: number            // Previous period widgets
+  activeWidgetsChange: number              // Absolute change
+  activeWidgetsChangePercent: number       // Percentage change
+  activeWidgetsTimeSeries: TimeSeriesDataPoint[]  // Daily trend
+}
+```
+
+---
+
+## Usage Pattern
+
+### In React Hook
+
+```typescript
+// src/hooks/use-per-store-metrics.ts
+const { stores, storesLoading, data, loading, error } = usePerStoreMetrics(selectedStoreId, 'THIS_WEEK')
+
+// Key feature: Conditional fetching
+// - On mount: Fetches stores list
+// - When storeId is null: No API call, data is null
+// - When storeId is set: Fetches metrics for that store
+```
+
+### In Dashboard Page
+
+```tsx
+function PerStoreDashboardContent() {
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null)
+  const [period, setPeriod] = useState<PeriodType>('THIS_WEEK')
+
+  const { stores, storesLoading, data, loading, error } = usePerStoreMetrics(selectedStoreId, period)
+
+  return (
+    <PerStoreMetrics
+      stores={stores}
+      storesLoading={storesLoading}
+      data={data}
+      selectedStoreId={selectedStoreId}
+      onStoreChange={setSelectedStoreId}
+      loading={loading}
+      error={error}
+    />
+  )
+}
+```
+
+---
+
+**Version**: 1.1.0
 **Last Updated**: 2025-12-15

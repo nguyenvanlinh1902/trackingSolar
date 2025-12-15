@@ -1,0 +1,202 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+// Home Navigation
+.nav-home {
+  padding: $spacing-xl $spacing-xl;
+  @include flex-between;
+  max-width: $max-width-narrow;
+  width: 100%;
+  margin: 0 auto;
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    cursor: pointer;
+  }
+
+  &__logo-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    @include flex-center;
+    backdrop-filter: blur(10px);
+  }
+
+  &__logo-text {
+    font-size: $text-2xl;
+    font-weight: $font-semibold;
+    color: $white;
+  }
+
+  &__signin-btn {
+    padding: 10px $spacing-xl;
+    background: rgba(255, 255, 255, 0.95);
+    color: #667eea;
+    border-radius: $radius-md;
+    border: none;
+    font-weight: $font-medium;
+    font-size: $text-base;
+    cursor: pointer;
+    transition: transform $transition-normal;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Dashboard Navigation
+.nav-dashboard {
+  background: $surface;
+  border-bottom: 1px solid $gray-200;
+  padding: $spacing-lg $spacing-xl;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  &__inner {
+    max-width: $max-width-narrow;
+    margin: 0 auto;
+    @include flex-between;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    cursor: pointer;
+  }
+
+  &__logo-icon {
+    width: 40px;
+    height: 40px;
+    background: $gradient-hero;
+    border-radius: 10px;
+    @include flex-center;
+  }
+
+  &__logo-text {
+    font-size: $text-2xl;
+    font-weight: $font-semibold;
+    color: $gray-800;
+  }
+
+  &__nav {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__nav-btn {
+    padding: $spacing-sm $spacing-lg;
+    border-radius: $radius-md;
+    border: none;
+    font-weight: $font-medium;
+    font-size: $text-base;
+    cursor: pointer;
+    transition: all $transition-normal;
+    background: transparent;
+    color: $gray-500;
+
+    &:hover {
+      background: $gray-100;
+    }
+
+    &--active {
+      background: #667eea;
+      color: $white;
+
+      &:hover {
+        background: #667eea;
+      }
+    }
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-left: $spacing-sm;
+    padding: $spacing-xs $spacing-md;
+    border-radius: $radius-md;
+    border: 1px solid $gray-200;
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid $gray-200;
+    object-fit: cover;
+  }
+
+  &__avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #667eea;
+    @include flex-center;
+    color: $white;
+    font-weight: $font-semibold;
+    font-size: $text-base;
+  }
+
+  &__user-info {
+    @include flex-column;
+    gap: 2px;
+  }
+
+  &__user-name {
+    font-size: $text-base;
+    font-weight: $font-medium;
+    color: $gray-800;
+    line-height: 1.2;
+  }
+
+  &__user-email {
+    font-size: $text-xs;
+    color: $gray-500;
+    line-height: 1.2;
+  }
+
+  &__signout-btn {
+    padding: 6px $spacing-md;
+    border-radius: $radius-sm;
+    border: 1px solid $gray-200;
+    background: $white;
+    color: $gray-500;
+    font-weight: $font-medium;
+    font-size: $text-xs;
+    cursor: pointer;
+    transition: all $transition-normal;
+    margin-left: $spacing-sm;
+
+    &:hover {
+      background: $gray-50;
+      border-color: $gray-300;
+    }
+  }
+
+  &__login-btn {
+    padding: $spacing-sm $spacing-lg;
+    border-radius: $radius-md;
+    border: 1px solid #667eea;
+    background: #667eea;
+    color: $white;
+    font-weight: $font-medium;
+    font-size: $text-base;
+    cursor: pointer;
+    transition: all $transition-normal;
+    margin-left: $spacing-sm;
+
+    &:hover {
+      background: #5568d3;
+      border-color: #5568d3;
+    }
+  }
+}

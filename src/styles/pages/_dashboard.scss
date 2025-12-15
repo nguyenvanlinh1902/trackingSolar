@@ -1,0 +1,145 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.dashboard {
+  min-height: 100vh;
+  background: $gray-50;
+
+  &__container {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $spacing-xl;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $spacing-xl;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__charts {
+    @include flex-column;
+    gap: $spacing-xl;
+  }
+}
+
+// Stat Card
+.stat-card {
+  @include card;
+  padding: $spacing-xl;
+  @include card-hover;
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+  }
+
+  &__label {
+    font-size: $text-base;
+    color: $text-secondary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__value {
+    font-size: $text-5xl;
+    font-weight: $font-bold;
+    color: $text-primary;
+    font-family: $font-heading;
+    letter-spacing: -0.5px;
+  }
+
+  &__icon {
+    @include icon-box;
+  }
+
+  &__icon--views {
+    background: $gradient-views;
+  }
+
+  &__icon--likes {
+    background: $gradient-likes;
+  }
+
+  &__icon--shares {
+    background: $gradient-shares;
+  }
+
+  &__icon--revenue {
+    background: $gradient-revenue;
+  }
+
+  &__footer {
+    margin-top: $spacing-lg;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px $spacing-sm;
+    border-radius: $radius-sm;
+    font-size: $text-sm;
+    font-weight: $font-semibold;
+
+    &--up {
+      background: rgba($success, 0.1);
+      color: $success;
+    }
+
+    &--down {
+      background: rgba($error, 0.1);
+      color: $error;
+    }
+  }
+
+  &__period {
+    font-size: $text-sm;
+    color: $text-muted;
+  }
+}
+
+// Loading & Error states
+.dashboard-loading {
+  @include flex-center;
+  min-height: 50vh;
+
+  &__spinner {
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-lg;
+  }
+}
+
+.dashboard-error {
+  @include flex-center;
+  min-height: 50vh;
+  padding: $spacing-xl;
+
+  &__content {
+    text-align: center;
+    @include card;
+    padding: $spacing-2xl;
+    max-width: 400px;
+  }
+
+  &__icon {
+    color: $error;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__title {
+    font-size: $text-xl;
+    font-weight: $font-semibold;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__message {
+    color: $text-secondary;
+    font-size: $text-base;
+  }
+}

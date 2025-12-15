@@ -1,0 +1,114 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// Components
+@use 'components/navigation';
+@use 'components/protected-route';
+@use 'components/google-signin';
+
+// Pages
+@use 'pages/home';
+@use 'pages/login';
+@use 'pages/dashboard';
+
+// Reset & Base
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: $font-body;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: $text-primary;
+  background: $background;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+// Global utilities
+.container {
+  @include container;
+}
+
+.flex-center {
+  @include flex-center;
+}
+
+.flex-between {
+  @include flex-between;
+}
+
+.flex-column {
+  @include flex-column;
+}
+
+// Text utilities
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.text-white {
+  color: $white;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-heading {
+  font-family: $font-heading;
+}
+
+// Background utilities
+.bg-surface {
+  background: $surface;
+}
+
+.bg-gray-50 {
+  background: $gray-50;
+}
+
+.bg-gradient-hero {
+  background: $gradient-hero;
+}
+
+.bg-gradient-primary {
+  background: $gradient-primary;
+}
+
+// Spinner
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: $white;
+  border-radius: 50%;
+  @include spin;
+}
+
+.spinner--primary {
+  border-color: rgba($primary, 0.2);
+  border-top-color: $primary;
+}

@@ -1,0 +1,240 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.login {
+  display: flex;
+  min-height: 100vh;
+  background: $gradient-hero;
+  position: relative;
+  overflow: hidden;
+
+  &__decoration {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+
+    &--top {
+      top: -20%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+    }
+
+    &--bottom {
+      bottom: -20%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    }
+  }
+
+  &__branding {
+    flex: 1;
+    display: none;
+    @include flex-column;
+    justify-content: center;
+    padding: $spacing-4xl;
+    color: $white;
+    position: relative;
+    z-index: 1;
+
+    @include desktop {
+      display: flex;
+    }
+  }
+
+  &__branding-content {
+    max-width: 520px;
+  }
+
+  &__brand-logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-3xl;
+  }
+
+  &__brand-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: $radius-lg;
+    @include flex-center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  &__brand-name {
+    font-size: $text-3xl;
+    font-weight: $font-semibold;
+    letter-spacing: -0.5px;
+  }
+
+  &__brand-title {
+    font-size: $text-6xl;
+    font-weight: $font-bold;
+    margin-bottom: $spacing-xl;
+    line-height: 1.1;
+    font-family: $font-heading;
+    letter-spacing: -1px;
+  }
+
+  &__brand-subtitle {
+    font-size: $text-xl;
+    opacity: 0.85;
+    line-height: 1.7;
+    margin-bottom: $spacing-3xl;
+  }
+
+  &__features {
+    @include flex-column;
+    gap: $spacing-xl;
+  }
+
+  &__feature {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    padding: $spacing-lg $spacing-xl;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: $radius-lg;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  &__feature-icon {
+    opacity: 0.9;
+  }
+
+  &__feature-title {
+    font-weight: $font-semibold;
+    font-size: $text-lg;
+  }
+
+  &__feature-desc {
+    font-size: $text-base;
+    opacity: 0.75;
+  }
+
+  // Right side - Form
+  &__form-section {
+    flex: 1;
+    @include flex-center;
+    padding: $spacing-xl;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 440px;
+    @include glass-effect;
+    border-radius: $radius-2xl;
+    padding: $spacing-3xl 40px;
+    box-shadow: $shadow-2xl;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  &__logo-wrapper {
+    @include flex-center;
+    margin-bottom: $spacing-2xl;
+  }
+
+  &__logo-box {
+    width: 64px;
+    height: 64px;
+    background: $gradient-primary;
+    border-radius: $radius-xl;
+    @include flex-center;
+    box-shadow: $shadow-glow;
+    color: $white;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-2xl;
+  }
+
+  &__title {
+    font-size: $text-4xl;
+    font-weight: $font-bold;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+    font-family: $font-heading;
+    letter-spacing: -0.5px;
+  }
+
+  &__subtitle-text {
+    font-size: 15px;
+    color: $text-secondary;
+  }
+
+  &__error {
+    padding: 14px $spacing-lg;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid $error-light;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-xl;
+    color: $error;
+    font-size: $text-base;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    margin: 28px 0;
+  }
+
+  &__divider-line {
+    flex: 1;
+    height: 1px;
+    background: $border-color;
+  }
+
+  &__divider-text {
+    padding: 0 $spacing-lg;
+    font-size: $text-xs;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__badges {
+    display: flex;
+    justify-content: center;
+    gap: $spacing-xl;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__badge {
+    font-size: 11px;
+    color: $text-muted;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__terms {
+    text-align: center;
+    font-size: $text-xs;
+    color: $text-muted;
+    line-height: 1.6;
+  }
+
+  &__link {
+    color: $primary;
+    cursor: pointer;
+    font-weight: $font-medium;
+  }
+}
+
+// Loading state
+.login-loading {
+  @include flex-center;
+  min-height: 100vh;
+  background: $gradient-hero;
+}

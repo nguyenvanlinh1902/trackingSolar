@@ -26,17 +26,29 @@ src/
 │   │   │   ├── loading-spinner.tsx
 │   │   │   ├── error-message.tsx
 │   │   │   └── index.ts
-│   │   └── polaris-charts.tsx  # Chart visualizations
+│   │   ├── per-store/     # Per-store metrics sub-components
+│   │   │   ├── store-selector.tsx           # Store search & selection
+│   │   │   ├── conversion-metrics.tsx       # Conversion cards
+│   │   │   ├── video-source-chart.tsx       # Source distribution donut
+│   │   │   ├── widget-metrics.tsx           # Widget usage sparkline
+│   │   │   ├── revenue-charts.tsx           # Revenue line charts
+│   │   │   └── index.ts
+│   │   ├── per-store-metrics.tsx            # Container component
+│   │   └── polaris-charts.tsx               # Chart visualizations
 │   ├── navigation.tsx
 │   ├── providers.tsx
 │   └── three/             # 3D scene components
 ├── pages/
 │   └── dashboard/
-│       └── analytics-page.tsx   # Main analytics dashboard
+│       ├── analytics-page.tsx       # Main ShopVid analytics dashboard
+│       └── per-store-page.tsx       # Per-store metrics dashboard (/dashboard/per-store)
 ├── services/
-│   └── analytics-service.ts     # Shopable API integration
+│   └── analytics-service.ts         # Shopable API integration
 ├── hooks/
-│   └── use-analytics.ts         # Analytics data fetching hook
+│   ├── use-analytics.ts             # ShopVid analytics data hook
+│   └── use-per-store-metrics.ts     # Per-store metrics fetching hook
+├── types/
+│   └── survey-metrics.ts            # Per-store metrics type definitions
 ├── lib/
 │   ├── constants.ts       # Design system & formatting functions
 │   ├── styles.ts          # Reusable style objects
@@ -85,13 +97,28 @@ AnalyticsData {
 }
 ```
 
-### Dashboard Page
+### Dashboard Page - ShopVid Analytics
 **File**: `analytics-page.tsx`
 
 Main layout renders:
 1. SummaryMetricsGrid - 5 KPI cards
 2. PolarisCharts - Line/bar charts
 3. VideoPerformanceTable - Top videos table
+
+### Per-Store Metrics Dashboard
+**File**: `per-store-page.tsx` (Route: `/dashboard/per-store`)
+
+Features:
+- Store selector with search capability (domain/ID/name filter)
+- Empty state when no store selected
+- Conditional API fetching (no call when storeId is null)
+- 4 conversion metric cards (Orders from ShopVid, ATC Mobile, ATC Desktop, CVR)
+- Video source distribution donut chart (TikTok/Instagram/Upload)
+- Widget usage sparkline chart
+- Revenue line charts (In-Video vs Post-Video)
+
+**Container**: `per-store-metrics.tsx`
+**Sub-components**: StoreSelector, ConversionMetrics, VideoSourceChart, WidgetMetrics, RevenueCharts
 
 ## Design System
 

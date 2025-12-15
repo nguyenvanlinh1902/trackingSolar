@@ -158,5 +158,179 @@ Uses design system constants from `src/lib/constants.ts`:
 
 ---
 
-**Version**: 1.0.0
+## Per-Store Metrics Components
+
+### PerStoreMetrics (Container)
+
+**File**: `src/components/dashboard/per-store-metrics.tsx`
+
+Main container for per-store metrics dashboard.
+
+**Props**:
+```typescript
+interface PerStoreMetricsProps {
+  stores: Store[]
+  storesLoading: boolean
+  data: PerStoreMetricsData | null
+  selectedStoreId: string | null
+  onStoreChange: (storeId: string | null) => void
+  loading: boolean
+  error: string | null
+}
+```
+
+**Usage**:
+```tsx
+<PerStoreMetrics
+  stores={stores}
+  storesLoading={storesLoading}
+  data={data}
+  selectedStoreId={selectedStoreId}
+  onStoreChange={setSelectedStoreId}
+  loading={loading}
+  error={error}
+/>
+```
+
+---
+
+### StoreSelector
+
+**File**: `src/components/dashboard/per-store/store-selector.tsx`
+
+Dropdown selector with search filtering for stores.
+
+**Props**:
+```typescript
+interface StoreSelectorProps {
+  stores: Store[]
+  selectedStoreId: string | null
+  onStoreChange: (storeId: string | null) => void
+  loading?: boolean
+}
+```
+
+**Features**:
+- Search across domain, ID, and name
+- Keyboard navigation
+- Loading state
+- Clear selection button
+
+**Example**:
+```tsx
+<StoreSelector
+  stores={stores}
+  selectedStoreId={selectedStoreId}
+  onStoreChange={setSelectedStoreId}
+  loading={storesLoading}
+/>
+```
+
+---
+
+### ConversionMetrics
+
+**File**: `src/components/dashboard/per-store/conversion-metrics.tsx`
+
+Grid of 4 conversion metric cards.
+
+**Props**:
+```typescript
+interface ConversionMetricsProps {
+  data: ConversionMetrics
+}
+```
+
+**Metrics Displayed**:
+1. Orders from ShopVid - number format
+2. ATC Rate Mobile - percent format
+3. ATC Rate Desktop - percent format
+4. CVR - percent format
+
+**Example**:
+```tsx
+<ConversionMetrics data={perStoreData.conversion} />
+```
+
+---
+
+### VideoSourceChart
+
+**File**: `src/components/dashboard/per-store/video-source-chart.tsx`
+
+Donut chart showing video source distribution.
+
+**Props**:
+```typescript
+interface VideoSourceChartProps {
+  data: VideoSourceMetrics
+}
+```
+
+**Chart Data**:
+- TikTok segment
+- Instagram segment
+- Upload segment
+- Total in center
+
+**Example**:
+```tsx
+<VideoSourceChart data={perStoreData.videoSource} />
+```
+
+---
+
+### WidgetMetrics
+
+**File**: `src/components/dashboard/per-store/widget-metrics.tsx`
+
+Metric card with sparkline showing active widgets trend.
+
+**Props**:
+```typescript
+interface WidgetMetricsProps {
+  data: PerStoreWidgetUsage
+}
+```
+
+**Display**:
+- Active widgets count
+- Change percentage
+- 7-day sparkline
+
+**Example**:
+```tsx
+<WidgetMetrics data={perStoreData.widgetUsage} />
+```
+
+---
+
+### RevenueCharts
+
+**File**: `src/components/dashboard/per-store/revenue-charts.tsx`
+
+Two line charts for In-Video and Post-Video revenue.
+
+**Props**:
+```typescript
+interface RevenueChartsProps {
+  data: {
+    inVideo: RevenueMetrics
+    postVideo: RevenueMetrics
+  }
+}
+```
+
+**Charts**:
+- In-Video Revenue (line chart)
+- Post-Video Revenue (line chart)
+
+**Example**:
+```tsx
+<RevenueCharts data={perStoreData.revenue} />
+```
+
+---
+
+**Version**: 1.1.0
 **Last Updated**: 2025-12-15

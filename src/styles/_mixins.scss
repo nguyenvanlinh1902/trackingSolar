@@ -1,0 +1,154 @@
+@use 'variables' as *;
+
+// Flexbox
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Glass effect
+@mixin glass-effect {
+  background: $glass-bg;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid $glass-border;
+}
+
+// Card styles
+@mixin card {
+  background: $surface;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-md;
+  border: 1px solid $border-color;
+}
+
+@mixin card-hover {
+  transition: all $transition-normal;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+}
+
+// Button base
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-medium;
+  font-size: $text-sm;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-fast;
+  border: none;
+  outline: none;
+}
+
+@mixin btn-primary {
+  @include btn-base;
+  background: $primary;
+  color: $white;
+
+  &:hover {
+    background: $primary-dark;
+  }
+}
+
+@mixin btn-ghost {
+  @include btn-base;
+  background: transparent;
+  color: $text-secondary;
+
+  &:hover {
+    background: $gray-100;
+  }
+}
+
+// Icon container
+@mixin icon-box($size: 48px) {
+  width: $size;
+  height: $size;
+  border-radius: $radius-lg;
+  @include flex-center;
+  color: $white;
+}
+
+// Container
+@mixin container {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 0 $spacing-xl;
+}
+
+// Text truncate
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Scrollbar
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $gray-100;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-300;
+    border-radius: 3px;
+
+    &:hover {
+      background: $gray-400;
+    }
+  }
+}
+
+// Animation
+@mixin spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@mixin mobile {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}

@@ -1,0 +1,19 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.protected-loading {
+  @include flex-center;
+  min-height: 100vh;
+  background: $gradient-hero;
+
+  &__content {
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-lg;
+  }
+
+  &__text {
+    color: $white;
+    font-size: $text-base;
+  }
+}
