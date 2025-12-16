@@ -43,5 +43,4 @@ jobs:
       env:
         FIREBASE_TOKEN: ${{ vars.FIREBASE_DEPLOY_KEY }}
       run: |
-        firebase use profilelinhnv --token $FIREBASE_TOKEN
         firebase deploy --only hosting --token $FIREBASE_TOKEN
