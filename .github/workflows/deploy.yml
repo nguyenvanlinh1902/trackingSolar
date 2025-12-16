@@ -40,6 +40,18 @@ jobs:
       run: npm install -g firebase-tools
       
     - name: Deploy to Firebase
+      env:
+        FIREBASE_TOKEN: ${{ vars.FIREBASE_DEPLOY_KEY }}
+        FIREBASE_PROJECT_ID: ${{ vars.VITE_PUBLIC_FIREBASE_PROJECT_ID }}
       run: |
-        firebase use ${{ vars.VITE_PUBLIC_FIREBASE_PROJECT_ID }} --token ${{ vars.FIREBASE_DEPLOY_KEY }}
-        firebase deploy --only hosting --token ${{ vars.FIREBASE_DEPLOY_KEY }}
+        if [ -z "$FIREBASE_TOKEN" ]; then
+          echo "Error: FIREBASE_TOKEN is not set"
+          exit 1
+        fi
+        if [ -z "$FIREBASE_PROJECT_ID" ]; then
+          echo "Error: FIREBASE_PROJECT_ID is not set"
+          exit 1
+        fi
+        echo "Using Firebase project: $FIREBASE_PROJECT_ID"
+        firebase use "$FIREBASE_PROJECT_ID" --token "$FIREBASE_TOKEN"
+        firebase deploy --only hosting --token "$FIREBASE_TOKEN"
