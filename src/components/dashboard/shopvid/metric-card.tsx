@@ -2,7 +2,7 @@
 
 import type { AnalyticsMetric } from '@/services/analytics-service';
 import { COLORS, formatNumber, formatPercent, formatCurrency } from '@/lib/constants';
-import { cardStyle, badgeStyle } from '@/lib/styles';
+import { cardStyle } from '@/lib/styles';
 
 interface MetricCardProps {
   label: string;
@@ -20,9 +20,6 @@ function formatValue(value: number, type: MetricCardProps['type']): string {
 }
 
 export function MetricCard({ label, metric, type = 'number', color }: MetricCardProps) {
-  const isPositive = metric.changePercent >= 0;
-  const changeIcon = isPositive ? '↑' : '↓';
-
   return (
     <div style={{ ...cardStyle, borderLeft: color ? `4px solid ${color}` : undefined }}>
       <p style={{

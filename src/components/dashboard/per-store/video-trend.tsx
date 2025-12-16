@@ -2,9 +2,15 @@
 
 import { useMemo } from 'react';
 import { ResponsiveLine } from '@nivo/line';
-import type { VideoTrendMetrics } from '@/types/survey-metrics';
+import type { TimeSeriesDataPoint } from '@/types/survey-metrics';
 import { COLORS, RADIUS, SPACING, formatDate } from '@/lib/constants';
 import { cardStyle } from '@/lib/styles';
+
+interface VideoTrendMetrics {
+  views: TimeSeriesDataPoint[];
+  likes: TimeSeriesDataPoint[];
+  shares: TimeSeriesDataPoint[];
+}
 
 interface VideoTrendProps {
   videoTrend: VideoTrendMetrics;
