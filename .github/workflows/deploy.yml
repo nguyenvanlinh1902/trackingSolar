@@ -50,7 +50,7 @@ jobs:
         if [ -z "$FIREBASE_TOKEN" ] || [ "$FIREBASE_TOKEN" == "" ]; then
           echo "Error: FIREBASE_TOKEN is not set"
           echo "Please set FIREBASE_DEPLOY_KEY in GitHub Environment Secrets or Variables"
-          echo "Settings → Environments → VITE_FIREBASE_API_KEY"
+          echo "Settings → Environments → VITE_PUBLIC_FIREBASE_API_KEY"
           exit 1
         fi
         if [ -z "$FIREBASE_PROJECT_ID" ] || [ "$FIREBASE_PROJECT_ID" == "" ]; then
