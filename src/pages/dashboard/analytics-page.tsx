@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAnalytics } from '@/hooks/use-analytics'
 import { useAllStoresMetrics } from '@/hooks/use-all-stores-metrics'
 import { PolarisCharts } from '@/components/dashboard/polaris-charts'
-import { VideoPerformanceTable, ErrorMessage, SummaryMetricsGrid } from '@/components/dashboard/shopvid'
+import { ErrorMessage, SummaryMetricsGrid } from '@/components/dashboard/shopvid'
 import { AllStoresWidgetUsage } from '@/components/dashboard/all-stores'
 import { VideoSourceChart } from '@/components/dashboard/per-store'
 
@@ -92,8 +92,6 @@ function AnalyticsDashboardContent() {
           
           {/* Video Source Distribution for All Stores */}
           {allStoresData && <VideoSourceChart videoSource={allStoresData.videoSource} />}
-          
-          <VideoPerformanceTable videos={analyticsData.topVideos} />
         </div>
       </div>
     </main>
