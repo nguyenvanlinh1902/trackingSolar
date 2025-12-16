@@ -44,5 +44,9 @@ jobs:
         FIREBASE_TOKEN: ${{ vars.FIREBASE_DEPLOY_KEY }}
         FIREBASE_PROJECT_ID: ${{ vars.VITE_PUBLIC_FIREBASE_PROJECT_ID }}
       run: |
+        if [ -z "$FIREBASE_TOKEN" ]; then
+          echo "Error: FIREBASE_TOKEN is not set"
+          exit 1
+        fi
         echo "Deploying to Firebase project: $FIREBASE_PROJECT_ID"
-        firebase deploy --only hosting --project $FIREBASE_PROJECT_ID --token "$FIREBASE_TOKEN" --non-interactive
+        firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --token "$FIREBASE_TOKEN" --non-interactive
