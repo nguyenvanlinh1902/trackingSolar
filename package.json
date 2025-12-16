@@ -1,10 +1,43 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "tracking-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Track your activities",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
-  "private": true
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@shopify/polaris": "^12.27.0",
+    "@shopify/polaris-viz": "^13.4.1",
+    "@nivo/line": "^0.88.0",
+    "@nivo/bar": "^0.88.0",
+    "@nivo/pie": "^0.88.0",
+    "firebase": "^10.14.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-router-dom": "^7.1.1",
+    "three": "^0.182.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.172.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "sass": "^1.96.0",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.5"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

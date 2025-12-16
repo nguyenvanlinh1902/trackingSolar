@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
-import { LineChart, SparkLineChart, PolarisVizProvider } from '@shopify/polaris-viz';
+import { ResponsiveLine } from '@nivo/line';
 import type { RevenueMetrics } from '@/types/survey-metrics';
-import { COLORS, RADIUS, SHADOWS, SPACING, formatCurrency, formatPercent, formatDate } from '@/lib/constants';
-import { cardStyle, badgeStyle, gridResponsive } from '@/lib/styles';
+import { COLORS, RADIUS, SHADOWS, SPACING, formatCurrency, formatPercent } from '@/lib/constants';
+import { badgeStyle, gridResponsive } from '@/lib/styles';
 
 // Revenue colors
 const REVENUE_COLORS = {
@@ -31,10 +31,30 @@ function RevenueSummaryCard({
   const isPositive = metric.changePercent >= 0;
   const changeIcon = isPositive ? '↑' : '↓';
 
-  const sparklineData = useMemo(
-    () => [{ data: metric.timeSeries.map((d) => ({ key: d.date, value: d.value })) }],
-    [metric.timeSeries]
-  );
+  const sparklineData = useMemo(() => {
+    if (!metric?.timeSeries || !Array.isArray(metric.timeSeries) || metric.timeSeries.length === 0) {
+      return null;
+    }
+    
+    const mappedData = metric.timeSeries
+      .map((d) => {
+        const date = d.date || '';
+        const value = typeof d.value === 'number' ? d.value : 0;
+        return { x: date, y: value };
+      })
+      .filter((item) => item.x && typeof item.y === 'number');
+    
+    if (mappedData.length === 0) {
+      return null;
+    }
+    
+    return [
+      {
+        id: label,
+        data: mappedData,
+      },
+    ];
+  }, [metric?.timeSeries, label]);
 
   return (
     <div
@@ -72,36 +92,44 @@ function RevenueSummaryCard({
         </span>
         <span style={{ fontSize: '12px', color: COLORS.textMuted }}>vs previous</span>
       </div>
-      <div style={{ height: '40px' }}>
-        <PolarisVizProvider>
-          <SparkLineChart
+      {sparklineData && sparklineData.length > 0 && sparklineData[0].data.length > 0 ? (
+        <div style={{ height: '40px' }}>
+          <ResponsiveLine
             data={sparklineData}
-            theme="Light"
-            accessibilityLabel={`${label} trend`}
+            margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
+            xScale={{ type: 'point' }}
+            yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
+            axisBottom={null}
+            axisLeft={null}
+            enableGridX={false}
+            enableGridY={false}
+            colors={[color]}
+            lineWidth={2}
+            pointSize={0}
+            useMesh
           />
-        </PolarisVizProvider>
-      </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: COLORS.textMuted,
+            fontSize: '11px',
+            backgroundColor: COLORS.gray50,
+            borderRadius: RADIUS.sm,
+          }}
+        >
+          No data
+        </div>
+      )}
     </div>
   );
 }
 
 export function RevenueCharts({ revenue }: RevenueChartsProps) {
-  // Combined line chart data
-  const lineChartData = useMemo(
-    () => [
-      {
-        name: 'In-Video Revenue',
-        data: revenue.inVideo.timeSeries.map((d) => ({ key: d.date, value: d.value })),
-        color: REVENUE_COLORS.inVideo,
-      },
-      {
-        name: 'Post-Video Revenue',
-        data: revenue.postVideo.timeSeries.map((d) => ({ key: d.date, value: d.value })),
-        color: REVENUE_COLORS.postVideo,
-      },
-    ],
-    [revenue]
-  );
 
   return (
     <div>
@@ -130,31 +158,6 @@ export function RevenueCharts({ revenue }: RevenueChartsProps) {
         />
       </div>
 
-      {/* Combined Line Chart */}
-      <div style={cardStyle}>
-        <h4
-          style={{
-            fontSize: '14px',
-            fontWeight: 500,
-            color: COLORS.textSecondary,
-            marginBottom: `${SPACING.lg}px`,
-          }}
-        >
-          Revenue Trend Over Time
-        </h4>
-        <div style={{ height: '250px' }}>
-          <PolarisVizProvider>
-            <LineChart
-              data={lineChartData}
-              theme="Light"
-              showLegend
-              xAxisOptions={{
-                labelFormatter: (value) => (value ? formatDate(String(value)) : ''),
-              }}
-            />
-          </PolarisVizProvider>
-        </div>
-      </div>
     </div>
   );
 }

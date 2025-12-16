@@ -1,18 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { usePerStoreMetrics } from '@/hooks/use-per-store-metrics';
 import { PerStoreMetrics } from '@/components/dashboard/per-store-metrics';
-import { COLORS, SPACING, PERIOD_OPTIONS } from '@/lib/constants';
-import { buttonStyle, pageContainerStyle, cardStyle } from '@/lib/styles';
-import type { PeriodType } from '@/services/analytics-service';
+import { StoreSelector } from '@/components/dashboard/per-store';
+import { COLORS, SPACING } from '@/lib/constants';
+import { pageContainerStyle, cardStyle } from '@/lib/styles';
 
 function PerStoreDashboardContent() {
-  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
-  const [period, setPeriod] = useState<PeriodType>('THIS_WEEK');
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
 
-  const { stores, storesLoading, data, loading, error } = usePerStoreMetrics(selectedStoreId, period);
+  const { data, loading, error, searchByDomain } = usePerStoreMetrics();
+  const navigate = useNavigate();
+
+  const handleSearch = async (domain: string) => {
+    setSelectedDomain(domain);
+    await searchByDomain(domain);
+  };
 
   return (
     <main style={{ backgroundColor: COLORS.background, minHeight: '100vh' }}>
@@ -51,27 +57,56 @@ function PerStoreDashboardContent() {
             </p>
           </div>
 
-          {/* Period Selector */}
-          <div style={{ display: 'flex', gap: `${SPACING.sm}px`, flexWrap: 'wrap' }}>
-            {PERIOD_OPTIONS.map((option) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: `${SPACING.md}px`, alignItems: 'flex-end', minWidth: '300px' }}>
+            {/* Page Switcher */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <button
-                key={option.value}
-                onClick={() => setPeriod(option.value as PeriodType)}
-                style={buttonStyle(period === option.value)}
+                type="button"
+                onClick={() => navigate('/dashboard/analytics')}
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  borderRadius: '999px',
+                  border: '1px solid rgba(148,163,184,0.5)',
+                  cursor: 'pointer',
+                  backgroundColor: COLORS.background,
+                  color: COLORS.textPrimary,
+                }}
               >
-                {option.label}
+                All Stores
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/per-store')}
+                style={{
+                  padding: '6px 14px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: '999px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  backgroundColor: COLORS.primary,
+                  color: '#ffffff',
+                }}
+              >
+                Per Store
+              </button>
+            </div>
+
+            <StoreSelector
+              selectedDomain={selectedDomain}
+              onDomainChange={setSelectedDomain}
+              loading={loading}
+              onSearch={handleSearch}
+            />
           </div>
         </div>
 
         {/* Per Store Metrics */}
         <PerStoreMetrics
-          stores={stores}
-          storesLoading={storesLoading}
           data={data}
-          selectedStoreId={selectedStoreId}
-          onStoreChange={setSelectedStoreId}
+          selectedStoreId={selectedDomain}
           loading={loading}
           error={error}
         />

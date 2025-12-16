@@ -13,8 +13,6 @@ const METRICS_CONFIG = [
   { key: 'totalViews', label: 'Total Views', type: 'number' as const, color: CHART_COLORS.views },
   { key: 'totalLikes', label: 'Total Likes', type: 'number' as const, color: CHART_COLORS.likes },
   { key: 'totalShares', label: 'Total Shares', type: 'number' as const, color: CHART_COLORS.shares },
-  { key: 'engagementRate', label: 'Engagement Rate', type: 'percent' as const, color: CHART_COLORS.engagement },
-  { key: 'revenue', label: 'Revenue', type: 'currency' as const, color: CHART_COLORS.revenue },
 ] as const;
 
 export function SummaryMetricsGrid({ summary }: SummaryMetricsGridProps) {

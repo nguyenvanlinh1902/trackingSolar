@@ -9,6 +9,8 @@ import type {
   VideoSourceMetrics,
   WidgetUsageMetrics,
   RevenueMetrics,
+  PerStoreWidgetUsage,
+  ConversionMetrics,
 } from '@/types/survey-metrics';
 
 export type PeriodType = 'THIS_WEEK' | 'LAST_WEEK' | 'THIS_MONTH' | 'LAST_MONTH';
@@ -78,7 +80,13 @@ const mockAnalyticsData: AnalyticsData = {
 
 /**
  * Fetches analytics data from Shopable API
- * @param period - Time period for analytics
+ * Uses /admin/api/v1/analytics/videos/all-stores endpoint
+ * Response structure: {
+ *   totalViews, totalLikes, totalShares,
+ *   topVideos: { byViews: [...], byLikes: [...], byShares: [...] },
+ *   platformCounts: { tiktok, instagram, import }
+ * }
+ * @param period - Time period for analytics (kept for compatibility)
  * @param shopDomain - Shop domain (optional, for API auth)
  */
 export async function getAnalytics(
@@ -86,27 +94,92 @@ export async function getAnalytics(
   shopDomain?: string
 ): Promise<AnalyticsData> {
   const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
 
   if (!baseUrl) {
-    // Return mock data in development
     console.log('Using mock analytics data (VITE_SHOPABLE_API_URL not set)');
     return { ...mockAnalyticsData, period };
   }
 
   try {
-    const response = await fetch(`${baseUrl}/api/analytics/${period}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(shopDomain && { 'X-Shop-Domain': shopDomain }),
-      },
-    });
+    const response = await fetch(
+      `${baseUrl}/admin/api/v1/analytics/videos/all-stores`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Api-Key': adminApiKey,
+          ...(shopDomain && { 'X-Shop-Domain': shopDomain }),
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Analytics API error: ${response.status}`);
     }
 
     const data = await response.json();
-    return { ...data.data, period };
+    
+    // Parse response structure
+    const totalViews = data.totalViews || 0;
+    const totalLikes = data.totalLikes || 0;
+    const totalShares = data.totalShares || 0;
+    
+    // Calculate engagement rate: (likes + shares) / views * 100
+    const engagementRate = totalViews > 0 ? ((totalLikes + totalShares) / totalViews) * 100 : 0;
+    
+    // For now, use current values as previous (no comparison data available)
+    // TODO: Fetch previous period data for comparison
+    const previousViews = totalViews; // Placeholder
+    const previousLikes = totalLikes; // Placeholder
+    const previousShares = totalShares; // Placeholder
+    const previousEngagementRate = engagementRate; // Placeholder
+    
+    // Parse top videos from byViews array
+    const topVideos: VideoAnalytics[] = (data.topVideos?.byViews || []).slice(0, 5).map((video: any) => ({
+      videoId: video.videoId || '',
+      title: `Video ${video.videoId?.substring(0, 8) || 'Unknown'}`,
+      views: video.views || 0,
+      likes: video.likes || 0,
+      shares: video.shares || 0,
+      engagement: totalViews > 0 ? ((video.likes || 0) + (video.shares || 0)) / totalViews * 100 : 0,
+    }));
+    
+    // Generate chart data (mock for now, as API doesn't provide time series)
+    // TODO: Fetch time series data if available
+    const chartData = mockAnalyticsData.chartData;
+    
+    return {
+      summary: {
+        totalViews: {
+          value: totalViews,
+          previousValue: previousViews,
+          change: 0, // TODO: Calculate from previous period
+          changePercent: 0, // TODO: Calculate from previous period
+        },
+        totalLikes: {
+          value: totalLikes,
+          previousValue: previousLikes,
+          change: 0,
+          changePercent: 0,
+        },
+        totalShares: {
+          value: totalShares,
+          previousValue: previousShares,
+          change: 0,
+          changePercent: 0,
+        },
+        engagementRate: {
+          value: engagementRate,
+          previousValue: previousEngagementRate,
+          change: 0,
+          changePercent: 0,
+        },
+        revenue: mockAnalyticsData.summary.revenue, // Keep mock revenue for now
+      },
+      chartData,
+      topVideos: topVideos.length > 0 ? topVideos : mockAnalyticsData.topVideos,
+      period,
+    };
   } catch (error) {
     console.error('Failed to fetch analytics:', error);
     // Fallback to mock data
@@ -192,19 +265,23 @@ const mockPerStoreMetrics: Omit<PerStoreMetricsData, 'storeId' | 'storeName'> = 
     total: 350,
   },
   widgetUsage: {
-    activeWidgets: 25,
-    activeWidgetsPrevious: 22,
-    activeWidgetsChange: 3,
-    activeWidgetsChangePercent: 13.6,
-    activeWidgetsTimeSeries: [
-      { date: '2024-12-09', value: 22 },
-      { date: '2024-12-10', value: 23 },
-      { date: '2024-12-11', value: 24 },
-      { date: '2024-12-12', value: 25 },
-      { date: '2024-12-13', value: 25 },
-      { date: '2024-12-14', value: 25 },
-      { date: '2024-12-15', value: 25 },
+    widgetTypes: [
+      { type: 'Basic carousel', count: 8 },
+      { type: 'Highlighted carousel', count: 5 },
+      { type: 'Grid', count: 7 },
+      { type: 'Float', count: 3 },
+      { type: 'Story', count: 2 },
     ],
+    avgWidgetsPerMerchant: 25.0,
+    avgActiveWidgetsPerMerchant: 20.0,
+    ctaActions: [
+      { action: 'Open product detail page', desktop: 45, mobile: 35, count: 80 },
+      { action: 'Show product detail within the modal', desktop: 25, mobile: 20, count: 45 },
+      { action: 'Add to cart (no page change)', desktop: 30, mobile: 25, count: 55 },
+      { action: 'Add to cart and open cart page', desktop: 15, mobile: 12, count: 27 },
+    ],
+    productPagesCount: 15,
+    otherPagesCount: 10,
   },
   conversion: {
     ordersFromShopvid: {
@@ -304,45 +381,337 @@ const mockPerStoreMetrics: Omit<PerStoreMetricsData, 'storeId' | 'storeName'> = 
 
 /**
  * Get list of stores
+ * No mock data fallback - requires API to be available
  */
 export async function getStores(): Promise<Store[]> {
   const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
   const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
 
   if (!baseUrl) {
-    console.log('Using mock stores data (VITE_SHOPABLE_API_URL not set)');
-    return [...mockStores];
+    throw new Error('VITE_SHOPABLE_API_URL is not set. Please configure the API URL.');
   }
 
-  try {
-    const response = await fetch(`${baseUrl}/admin/api/v1/analytics/stores`, {
+  const response = await fetch(`${baseUrl}/admin/api/v1/analytics/stores`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Api-Key': adminApiKey,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Unauthorized: Invalid API key');
+    }
+    throw new Error(`Stores API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.data || data.stores || [];
+}
+
+/**
+ * Search stores by keyword
+ * Uses /admin/api/v1/analytics/stores endpoint with search query parameter
+ * @param searchTerm - Search keyword (searches by name, domain, or ID)
+ */
+export async function searchStores(searchTerm: string): Promise<Store[]> {
+  const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
+
+  if (!baseUrl) {
+    throw new Error('VITE_SHOPABLE_API_URL is not set. Please configure the API URL.');
+  }
+
+  // If search term is empty, return all stores
+  if (!searchTerm.trim()) {
+    return getStores();
+  }
+
+  const response = await fetch(
+    `${baseUrl}/admin/api/v1/analytics/stores?search=${encodeURIComponent(searchTerm.trim())}`,
+    {
       headers: {
         'Content-Type': 'application/json',
         'X-Admin-Api-Key': adminApiKey,
       },
-    });
+    }
+  );
 
-    if (!response.ok) {
-      if (response.status === 401) {
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Unauthorized: Invalid API key');
+    }
+    throw new Error(`Search stores API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.data || data.stores || [];
+}
+
+/**
+ * Get per store metrics by domain
+ * Calls 2 APIs: /analytics/widgets/by-domain and /analytics/videos/by-domain
+ */
+export async function getPerStoreMetricsByDomain(
+  domain: string
+): Promise<PerStoreMetricsData> {
+  const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY || 'avada_admin_!@#123';
+
+  if (!baseUrl) {
+    throw new Error('VITE_SHOPABLE_API_URL is not set. Please configure the API URL.');
+  }
+
+  try {
+    // Call both APIs in parallel
+    const [widgetsResponse, videosResponse] = await Promise.all([
+      fetch(`${baseUrl}/admin/api/v1/analytics/widgets/by-domain`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Api-Key': adminApiKey,
+          'X-Shop-Domain': domain,
+        },
+      }),
+      fetch(`${baseUrl}/admin/api/v1/analytics/videos/by-domain`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Api-Key': adminApiKey,
+          'X-Shop-Domain': domain,
+        },
+      }),
+    ]);
+
+    // Check widgets API response
+    if (!widgetsResponse.ok) {
+      if (widgetsResponse.status === 401) {
         throw new Error('Unauthorized: Invalid API key');
       }
-      throw new Error(`Stores API error: ${response.status}`);
+      if (widgetsResponse.status === 404) {
+        throw new Error(`Store not found for domain: ${domain}`);
+      }
+      throw new Error(`Widgets API error: ${widgetsResponse.status}`);
     }
 
-    const data = await response.json();
-    return data.data || data.stores || [];
+    // Check videos API response
+    if (!videosResponse.ok) {
+      if (videosResponse.status === 401) {
+        throw new Error('Unauthorized: Invalid API key');
+      }
+      if (videosResponse.status === 404) {
+        throw new Error(`Store not found for domain: ${domain}`);
+      }
+      throw new Error(`Videos API error: ${videosResponse.status}`);
+    }
+
+    const widgetsData = await widgetsResponse.json();
+    const videosData = await videosResponse.json();
+
+    // Parse widgets data
+    const widgetsResult = widgetsData.data || widgetsData;
+    
+    // Parse videos data
+    const videosResult = videosData.data || videosData;
+
+    // Parse summary metrics from videos API
+    const totalViews = videosResult.totalViews || 0;
+    const totalLikes = videosResult.totalLikes || 0;
+    const totalShares = videosResult.totalShares || 0;
+    const engagementRate = totalViews > 0 ? ((totalLikes + totalShares) / totalViews) * 100 : 0;
+    
+    // Calculate previous values (use current as placeholder if not available)
+    const previousViews = videosResult.previousViews || videosResult.totalViewsPrevious || totalViews;
+    const previousLikes = videosResult.previousLikes || videosResult.totalLikesPrevious || totalLikes;
+    const previousShares = videosResult.previousShares || videosResult.totalSharesPrevious || totalShares;
+    const previousEngagementRate = videosResult.previousEngagementRate || engagementRate;
+    
+    // Calculate revenue (sum of inVideo and postVideo)
+    const revenueValue = (mockPerStoreMetrics.revenue.inVideo.value || 0) + (mockPerStoreMetrics.revenue.postVideo.value || 0);
+    const revenuePrevious = (mockPerStoreMetrics.revenue.inVideo.previousValue || 0) + (mockPerStoreMetrics.revenue.postVideo.previousValue || 0);
+    const revenueChange = revenueValue - revenuePrevious;
+    const revenueChangePercent = revenuePrevious > 0 ? (revenueChange / revenuePrevious) * 100 : 0;
+
+    const summary = {
+      totalViews: {
+        value: totalViews,
+        previousValue: previousViews,
+        change: totalViews - previousViews,
+        changePercent: previousViews > 0 ? ((totalViews - previousViews) / previousViews) * 100 : 0,
+      },
+      totalLikes: {
+        value: totalLikes,
+        previousValue: previousLikes,
+        change: totalLikes - previousLikes,
+        changePercent: previousLikes > 0 ? ((totalLikes - previousLikes) / previousLikes) * 100 : 0,
+      },
+      totalShares: {
+        value: totalShares,
+        previousValue: previousShares,
+        change: totalShares - previousShares,
+        changePercent: previousShares > 0 ? ((totalShares - previousShares) / previousShares) * 100 : 0,
+      },
+      engagementRate: {
+        value: engagementRate,
+        previousValue: previousEngagementRate,
+        change: engagementRate - previousEngagementRate,
+        changePercent: previousEngagementRate > 0 ? ((engagementRate - previousEngagementRate) / previousEngagementRate) * 100 : 0,
+      },
+      revenue: {
+        value: revenueValue,
+        previousValue: revenuePrevious,
+        change: revenueChange,
+        changePercent: revenueChangePercent,
+      },
+    };
+
+    // Parse video source from videos API
+    const platformCounts = videosResult.platformCounts || {};
+    const videoSource: VideoSourceMetrics = {
+      tiktok: platformCounts.tiktok || 0,
+      instagram: platformCounts.instagram || 0,
+      upload: platformCounts.import || platformCounts.upload || 0,
+      total: (platformCounts.tiktok || 0) + (platformCounts.instagram || 0) + (platformCounts.import || platformCounts.upload || 0),
+    };
+
+    // Parse widget usage from widgets API - same structure as all stores
+    const layoutBreakdown = widgetsResult.layoutBreakdown || {};
+    const widgetTypes = [
+      { type: 'Basic carousel', count: layoutBreakdown.basic_carousel || 0 },
+      { type: 'Highlighted carousel', count: layoutBreakdown.highlighted_carousel || 0 },
+      { type: 'Grid', count: layoutBreakdown.grid || 0 },
+      { type: 'Float', count: layoutBreakdown.float || 0 },
+      { type: 'Story', count: layoutBreakdown.story || 0 },
+      { type: 'List', count: layoutBreakdown.list || 0 },
+    ].filter(w => w.count > 0);
+
+    const totalWidgets = widgetsResult.totalWidgets || widgetsResult.activeWidgets || 0;
+    const activeWidgets = widgetsResult.activeWidgets || totalWidgets;
+    // For per-store: totalActiveMerchants = 1 (single store)
+    const totalActiveMerchants = 1;
+    const avgWidgetsPerMerchant = totalWidgets / totalActiveMerchants;
+    const avgActiveWidgetsPerMerchant = activeWidgets / totalActiveMerchants;
+
+    // Parse CTA actions
+    const ctaActionsList: Array<{ action: string; desktop: number; mobile: number; count: number }> = [];
+    const ctaActions = widgetsResult.ctaActions;
+    
+    if (ctaActions && ctaActions.desktop && ctaActions.mobile) {
+      const actionMap: Record<string, string> = {
+        'product-page': 'Open product detail page',
+        'product-modal': 'Show product detail within the modal',
+        'add-to-cart': 'Add to cart (no page change)',
+        'cart-page': 'Add to cart and open cart page',
+      };
+      
+      const allActions = new Set([
+        ...Object.keys(ctaActions.desktop),
+        ...Object.keys(ctaActions.mobile),
+      ]);
+      
+      allActions.forEach((key) => {
+        const desktopCount = ctaActions.desktop[key] || 0;
+        const mobileCount = ctaActions.mobile[key] || 0;
+        const total = desktopCount + mobileCount;
+        
+        if (total > 0) {
+          ctaActionsList.push({
+            action: actionMap[key] || key,
+            desktop: desktopCount,
+            mobile: mobileCount,
+            count: total,
+          });
+        }
+      });
+    }
+
+    const widgetUsage: PerStoreWidgetUsage = {
+      widgetTypes,
+      avgWidgetsPerMerchant,
+      avgActiveWidgetsPerMerchant,
+      ctaActions: ctaActionsList,
+      productPagesCount: widgetsResult.productPagesCount || 0,
+      otherPagesCount: widgetsResult.otherPagesCount || 0,
+    };
+
+    // Get store info from either API response
+    const storeId = widgetsResult.storeId || videosResult.storeId || domain;
+    const storeName = widgetsResult.storeName || videosResult.storeName || domain;
+
+    // Parse revenue timeSeries from API if available, otherwise use mock
+    const parseTimeSeries = (rawData: any[] | undefined) => {
+      if (!Array.isArray(rawData)) return [];
+      return rawData.map((item: any) => ({
+        date: item.date || item.x || '',
+        value: typeof item.value === 'number' ? item.value : (typeof item.y === 'number' ? item.y : 0),
+      })).filter((item: any) => item.date && typeof item.value === 'number');
+    };
+
+    // For conversion and revenue, use mock data for now or get from another API
+    // TODO: Add conversion and revenue APIs if available
+    const mockConversion = mockPerStoreMetrics.conversion;
+    const mockRevenue = mockPerStoreMetrics.revenue;
+
+    const conversion: ConversionMetrics = {
+      ordersFromShopvid: {
+        ...mockConversion.ordersFromShopvid,
+        timeSeries: parseTimeSeries(videosResult.ordersTimeSeries || widgetsResult.ordersTimeSeries) || mockConversion.ordersFromShopvid.timeSeries,
+      },
+      atcRateMobile: {
+        ...mockConversion.atcRateMobile,
+        timeSeries: parseTimeSeries(videosResult.atcRateMobileTimeSeries || widgetsResult.atcRateMobileTimeSeries) || mockConversion.atcRateMobile.timeSeries,
+      },
+      atcRateDesktop: {
+        ...mockConversion.atcRateDesktop,
+        timeSeries: parseTimeSeries(videosResult.atcRateDesktopTimeSeries || widgetsResult.atcRateDesktopTimeSeries) || mockConversion.atcRateDesktop.timeSeries,
+      },
+      cvr: {
+        ...mockConversion.cvr,
+        timeSeries: parseTimeSeries(videosResult.cvrTimeSeries || widgetsResult.cvrTimeSeries) || mockConversion.cvr.timeSeries,
+      },
+    };
+
+    const revenue = {
+      inVideo: {
+        ...mockRevenue.inVideo,
+        timeSeries: parseTimeSeries(videosResult.inVideoTimeSeries || widgetsResult.inVideoTimeSeries) || mockRevenue.inVideo.timeSeries,
+      },
+      postVideo: {
+        ...mockRevenue.postVideo,
+        timeSeries: parseTimeSeries(videosResult.postVideoTimeSeries || widgetsResult.postVideoTimeSeries) || mockRevenue.postVideo.timeSeries,
+      },
+    };
+
+    // Parse top videos from videos API
+    const topVideos = (videosResult.topVideos?.byViews || videosResult.topVideos || []).slice(0, 5).map((video: any) => ({
+      videoId: video.videoId || video.id || '',
+      title: video.title || `Video ${(video.videoId || video.id || '').substring(0, 8) || 'Unknown'}`,
+      views: video.views || 0,
+      likes: video.likes || 0,
+      shares: video.shares || 0,
+      engagement: totalViews > 0 ? ((video.likes || 0) + (video.shares || 0)) / totalViews * 100 : 0,
+      thumbnail: video.thumbnail,
+    }));
+
+    return {
+      storeId,
+      storeName,
+      summary,
+      videoSource,
+      widgetUsage,
+      conversion,
+      revenue,
+      topVideos,
+    };
   } catch (error) {
-    console.error('Failed to fetch stores:', error);
-    return [...mockStores];
+    console.error('Failed to fetch per store metrics by domain:', error);
+    throw error;
   }
 }
 
 /**
- * Get per store metrics
+ * Get per store metrics by store ID (kept for backward compatibility)
  */
 export async function getPerStoreMetrics(
   storeId: string,
-  period: PeriodType = 'THIS_WEEK',
   shopDomain?: string
 ): Promise<PerStoreMetricsData> {
   const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
@@ -359,7 +728,7 @@ export async function getPerStoreMetrics(
 
   try {
     const response = await fetch(
-      `${baseUrl}/admin/api/v1/analytics/stats/shop/${storeId}?period=${period}`,
+      `${baseUrl}/admin/api/v1/analytics/stats/shop/${storeId}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -418,10 +787,10 @@ const mockSurveyMetrics: SurveyMetricsData = {
     avgWidgetsPerMerchant: 12.5,
     avgActiveWidgetsPerMerchant: 8.2,
     ctaActions: [
-      { action: 'Open product detail page', count: 320 },
-      { action: 'Show product detail within the modal', count: 180 },
-      { action: 'Add to cart (no page change)', count: 250 },
-      { action: 'Add to cart and open cart page', count: 150 },
+      { action: 'Open product detail page', desktop: 180, mobile: 140, count: 320 },
+      { action: 'Show product detail within the modal', desktop: 100, mobile: 80, count: 180 },
+      { action: 'Add to cart (no page change)', desktop: 140, mobile: 110, count: 250 },
+      { action: 'Add to cart and open cart page', desktop: 85, mobile: 65, count: 150 },
     ],
   },
   revenue: {
@@ -430,6 +799,8 @@ const mockSurveyMetrics: SurveyMetricsData = {
       previousValue: 10200,
       change: 2300,
       changePercent: 22.5,
+      startDate: '2024-12-09',
+      endDate: '2024-12-15',
       timeSeries: [
         { date: '2024-12-09', value: 1200 },
         { date: '2024-12-10', value: 1850 },
@@ -445,6 +816,8 @@ const mockSurveyMetrics: SurveyMetricsData = {
       previousValue: 7200,
       change: 1300,
       changePercent: 18.1,
+      startDate: '2024-12-09',
+      endDate: '2024-12-15',
       timeSeries: [
         { date: '2024-12-09', value: 800 },
         { date: '2024-12-10', value: 1200 },
@@ -460,9 +833,10 @@ const mockSurveyMetrics: SurveyMetricsData = {
 
 /**
  * Get video source metrics for all stores
+ * Uses /admin/api/v1/analytics/videos/all-stores endpoint
+ * Response structure: { platformCounts: { tiktok, instagram, import } }
  */
 export async function getVideoSourceMetrics(
-  period: PeriodType = 'THIS_WEEK',
   shopDomain?: string
 ): Promise<VideoSourceMetrics> {
   const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
@@ -475,7 +849,7 @@ export async function getVideoSourceMetrics(
 
   try {
     const response = await fetch(
-      `${baseUrl}/admin/api/v1/analytics/stats/video-source?period=${period}`,
+      `${baseUrl}/admin/api/v1/analytics/videos/all-stores`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -490,7 +864,22 @@ export async function getVideoSourceMetrics(
     }
 
     const data = await response.json();
-    return data.data;
+    
+    // Parse response structure: { platformCounts: { tiktok, instagram, import } }
+    if (data.platformCounts) {
+      const { tiktok, instagram, import: upload } = data.platformCounts;
+      const total = (tiktok || 0) + (instagram || 0) + (upload || 0);
+      
+      return {
+        tiktok: tiktok || 0,
+        instagram: instagram || 0,
+        upload: upload || 0,
+        total,
+      };
+    }
+    
+    // Fallback to data structure if different
+    return data.data?.videoSource || data.data || mockSurveyMetrics.videoSource;
   } catch (error) {
     console.error('Failed to fetch video source metrics:', error);
     return mockSurveyMetrics.videoSource;
@@ -499,9 +888,14 @@ export async function getVideoSourceMetrics(
 
 /**
  * Get widget usage metrics for all stores
+ * Uses /admin/api/v1/analytics/widgets/all-stores endpoint
+ * Response structure: {
+ *   totalWidgets, activeWidgets, inactiveWidgets,
+ *   layoutBreakdown: { grid, float, basic_carousel, highlighted_carousel, list, story },
+ *   ctaActions: { desktop: { product-page, product-modal, add-to-cart, cart-page }, mobile: {...} }
+ * }
  */
 export async function getWidgetUsageMetrics(
-  period: PeriodType = 'THIS_WEEK',
   shopDomain?: string
 ): Promise<WidgetUsageMetrics> {
   const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
@@ -514,7 +908,7 @@ export async function getWidgetUsageMetrics(
 
   try {
     const response = await fetch(
-      `${baseUrl}/admin/api/v1/analytics/stats/widget-usage?period=${period}`,
+      `${baseUrl}/admin/api/v1/analytics/widgets/all-stores`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -529,7 +923,79 @@ export async function getWidgetUsageMetrics(
     }
 
     const data = await response.json();
-    return data.data;
+    
+    console.log('Widget usage API response:', data); // Debug log
+    
+    // Parse response structure - only require layoutBreakdown
+    if (data.layoutBreakdown) {
+      const { layoutBreakdown, ctaActions, totalWidgets, activeWidgets } = data;
+      
+      // Map layout breakdown to widget types
+      const widgetTypes = [
+        { type: 'Basic carousel', count: layoutBreakdown.basic_carousel || 0 },
+        { type: 'Highlighted carousel', count: layoutBreakdown.highlighted_carousel || 0 },
+        { type: 'Grid', count: layoutBreakdown.grid || 0 },
+        { type: 'Float', count: layoutBreakdown.float || 0 },
+        { type: 'Story', count: layoutBreakdown.story || 0 },
+        { type: 'List', count: layoutBreakdown.list || 0 },
+      ].filter(w => w.count > 0); // Only include types with count > 0
+      
+      console.log('Parsed widgetTypes:', widgetTypes); // Debug log
+      
+      // Map CTA actions from desktop/mobile structure
+      const ctaActionsList: Array<{ action: string; desktop: number; mobile: number; count: number }> = [];
+      
+      if (ctaActions && ctaActions.desktop && ctaActions.mobile) {
+        const actionMap: Record<string, string> = {
+          'product-page': 'Open product detail page',
+          'product-modal': 'Show product detail within the modal',
+          'add-to-cart': 'Add to cart (no page change)',
+          'cart-page': 'Add to cart and open cart page',
+        };
+        
+        // Get all unique action keys
+        const allActions = new Set([
+          ...Object.keys(ctaActions.desktop),
+          ...Object.keys(ctaActions.mobile),
+        ]);
+        
+        allActions.forEach((key) => {
+          const desktopCount = ctaActions.desktop[key] || 0;
+          const mobileCount = ctaActions.mobile[key] || 0;
+          const total = desktopCount + mobileCount;
+          
+          if (total > 0) {
+            ctaActionsList.push({
+              action: actionMap[key] || key,
+              desktop: desktopCount,
+              mobile: mobileCount,
+              count: total,
+            });
+          }
+        });
+      }
+      
+      // Calculate average widgets per merchant = totalWidgets / totalActiveMerchants
+      const totalActiveMerchants = data.totalActiveMerchants || data.activeMerchants || data.merchantCount || 1;
+      const avgWidgetsPerMerchant = totalActiveMerchants > 0 ? totalWidgets / totalActiveMerchants : 0;
+      const avgActiveWidgetsPerMerchant = totalActiveMerchants > 0 ? activeWidgets / totalActiveMerchants : 0;
+      
+      // Parse page counts if available
+      const productPagesCount = data.productPagesCount || 0;
+      const otherPagesCount = data.otherPagesCount || 0;
+      
+      return {
+        widgetTypes,
+        avgWidgetsPerMerchant,
+        avgActiveWidgetsPerMerchant,
+        ctaActions: ctaActionsList,
+        productPagesCount,
+        otherPagesCount,
+      };
+    }
+    
+    // Fallback to data structure if different
+    return data.data?.widgetUsage || data.data || mockSurveyMetrics.widgetUsage;
   } catch (error) {
     console.error('Failed to fetch widget usage metrics:', error);
     return mockSurveyMetrics.widgetUsage;
@@ -537,10 +1003,14 @@ export async function getWidgetUsageMetrics(
 }
 
 /**
- * Get revenue metrics for all stores
+ * Get revenue metrics for all stores with date range
+ * Uses /admin/api/v1/analytics/stats endpoint
+ * @param startDate - Start date for revenue metrics (YYYY-MM-DD)
+ * @param endDate - End date for revenue metrics (YYYY-MM-DD)
  */
 export async function getRevenueMetrics(
-  period: PeriodType = 'THIS_WEEK',
+  startDate: string,
+  endDate: string,
   shopDomain?: string
 ): Promise<{ inVideo: RevenueMetrics; postVideo: RevenueMetrics }> {
   const baseUrl = import.meta.env.VITE_SHOPABLE_API_URL;
@@ -553,7 +1023,7 @@ export async function getRevenueMetrics(
 
   try {
     const response = await fetch(
-      `${baseUrl}/admin/api/v1/analytics/stats/revenue?period=${period}`,
+      `${baseUrl}/admin/api/v1/analytics/stats?startDate=${startDate}&endDate=${endDate}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -568,7 +1038,12 @@ export async function getRevenueMetrics(
     }
 
     const data = await response.json();
-    return data.data;
+    // Extract revenue from response and add date range
+    const revenue = data.data?.revenue || data.data || mockSurveyMetrics.revenue;
+    return {
+      inVideo: { ...revenue.inVideo, startDate, endDate },
+      postVideo: { ...revenue.postVideo, startDate, endDate },
+    };
   } catch (error) {
     console.error('Failed to fetch revenue metrics:', error);
     return mockSurveyMetrics.revenue;
@@ -577,16 +1052,36 @@ export async function getRevenueMetrics(
 
 /**
  * Get all stores metrics (combined)
- * Fetches video source, widget usage, and revenue metrics in parallel
+ * Fetches video source and widget usage metrics in parallel
+ * Revenue metrics require date range - call separately if needed
  */
 export async function getAllStoresMetrics(
-  period: PeriodType = 'THIS_WEEK',
+  shopDomain?: string
+): Promise<Omit<SurveyMetricsData, 'revenue'>> {
+  const [videoSource, widgetUsage] = await Promise.all([
+    getVideoSourceMetrics(shopDomain),
+    getWidgetUsageMetrics(shopDomain),
+  ]);
+
+  return {
+    videoSource,
+    widgetUsage,
+  };
+}
+
+/**
+ * Get all stores metrics with revenue (requires date range)
+ * Fetches video source, widget usage, and revenue metrics in parallel
+ */
+export async function getAllStoresMetricsWithRevenue(
+  startDate: string,
+  endDate: string,
   shopDomain?: string
 ): Promise<SurveyMetricsData> {
   const [videoSource, widgetUsage, revenue] = await Promise.all([
-    getVideoSourceMetrics(period, shopDomain),
-    getWidgetUsageMetrics(period, shopDomain),
-    getRevenueMetrics(period, shopDomain),
+    getVideoSourceMetrics(shopDomain),
+    getWidgetUsageMetrics(shopDomain),
+    getRevenueMetrics(startDate, endDate, shopDomain),
   ]);
 
   return {

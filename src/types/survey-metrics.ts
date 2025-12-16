@@ -29,8 +29,17 @@ export interface VideoSourceMetrics {
   total: number;
 }
 
-// Revenue metrics with time series
-export interface RevenueMetrics extends MetricWithTimeSeries {}
+// Revenue metrics with time series and date range
+export interface RevenueMetrics extends MetricWithTimeSeries {
+  startDate?: string; // Optional date range start
+  endDate?: string; // Optional date range end
+}
+
+// Engagement Rate metric with date range
+export interface EngagementRateMetrics extends MetricWithChange {
+  startDate?: string; // Optional date range start
+  endDate?: string; // Optional date range end
+}
 
 // Conversion metrics for per store
 export interface ConversionMetrics {
@@ -40,19 +49,41 @@ export interface ConversionMetrics {
   cvr: MetricWithTimeSeries;
 }
 
-// Widget usage metrics for per store
+// Widget usage metrics for per store (same structure as all stores)
 export interface PerStoreWidgetUsage {
-  activeWidgets: number;
-  activeWidgetsPrevious: number;
-  activeWidgetsChange: number;
-  activeWidgetsChangePercent: number;
-  activeWidgetsTimeSeries: TimeSeriesDataPoint[];
+  widgetTypes: WidgetTypeCount[];
+  avgWidgetsPerMerchant: number;
+  avgActiveWidgetsPerMerchant: number;
+  ctaActions: CTAActionCount[];
+  productPagesCount?: number;
+  otherPagesCount?: number;
+  // Legacy fields for backward compatibility
+  activeWidgets?: number;
+  activeWidgetsPrevious?: number;
+  activeWidgetsChange?: number;
+  activeWidgetsChangePercent?: number;
+  activeWidgetsTimeSeries?: TimeSeriesDataPoint[];
+}
+
+// Analytics metric with change tracking
+export interface AnalyticsMetric {
+  value: number;
+  previousValue: number;
+  change: number;
+  changePercent: number;
 }
 
 // Per Store metrics data structure
 export interface PerStoreMetricsData {
   storeId: string;
   storeName: string;
+  summary?: {
+    totalViews: AnalyticsMetric;
+    totalLikes: AnalyticsMetric;
+    totalShares: AnalyticsMetric;
+    engagementRate: AnalyticsMetric;
+    revenue: AnalyticsMetric;
+  };
   videoSource: VideoSourceMetrics;
   widgetUsage: PerStoreWidgetUsage;
   conversion: ConversionMetrics;
@@ -60,6 +91,15 @@ export interface PerStoreMetricsData {
     inVideo: RevenueMetrics;
     postVideo: RevenueMetrics;
   };
+  topVideos?: Array<{
+    videoId: string;
+    title: string;
+    views: number;
+    likes: number;
+    shares: number;
+    engagement: number;
+    thumbnail?: string;
+  }>;
 }
 
 // Store entity
@@ -77,10 +117,12 @@ export interface WidgetTypeCount {
   count: number;
 }
 
-// CTA action usage count
+// CTA action usage count with desktop/mobile breakdown
 export interface CTAActionCount {
   action: string;
-  count: number;
+  desktop: number;
+  mobile: number;
+  count?: number; // Total (desktop + mobile), optional for backward compatibility
 }
 
 // Widget usage metrics for all stores
@@ -89,6 +131,8 @@ export interface WidgetUsageMetrics {
   avgWidgetsPerMerchant: number;
   avgActiveWidgetsPerMerchant: number;
   ctaActions: CTAActionCount[];
+  productPagesCount?: number;
+  otherPagesCount?: number;
 }
 
 // All Stores metrics data structure

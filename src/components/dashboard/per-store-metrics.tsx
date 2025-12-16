@@ -1,45 +1,28 @@
 'use client';
 
-import type { Store, PerStoreMetricsData } from '@/types/survey-metrics';
+import type { PerStoreMetricsData } from '@/types/survey-metrics';
 import { COLORS, RADIUS, SPACING } from '@/lib/constants';
 import {
-  StoreSelector,
   VideoSourceChart,
   WidgetMetrics,
-  ConversionMetrics,
-  RevenueCharts,
 } from './per-store';
-import { LoadingSpinner, ErrorMessage } from './shopvid';
+import { LoadingSpinner, ErrorMessage, SummaryMetricsGrid } from './shopvid';
 
 interface PerStoreMetricsProps {
-  stores: Store[];
-  storesLoading: boolean;
   data: PerStoreMetricsData | null;
   selectedStoreId: string | null;
-  onStoreChange: (storeId: string | null) => void;
   loading: boolean;
   error: string | null;
 }
 
 export function PerStoreMetrics({
-  stores,
-  storesLoading,
   data,
   selectedStoreId,
-  onStoreChange,
   loading,
   error,
 }: PerStoreMetricsProps) {
   return (
     <div style={{ display: 'grid', gap: `${SPACING.xl}px` }}>
-      {/* Store Selector */}
-      <StoreSelector
-        stores={stores}
-        selectedStoreId={selectedStoreId}
-        onStoreChange={onStoreChange}
-        loading={storesLoading}
-      />
-
       {/* Empty State - No store selected */}
       {!selectedStoreId && (
         <div
@@ -67,7 +50,7 @@ export function PerStoreMetrics({
               fontWeight: 500,
             }}
           >
-            Select a store to view metrics
+            Search for a store to view metrics
           </p>
           <p
             style={{
@@ -119,17 +102,18 @@ export function PerStoreMetrics({
             </p>
           </div>
 
-          {/* Video Source Distribution */}
-          <VideoSourceChart videoSource={data.videoSource} />
+          {/* Summary Metrics (Total Views, Likes, Shares) */}
+          {data.summary && (
+            <div style={{ display: 'grid', gap: '24px' }}>
+              <SummaryMetricsGrid summary={data.summary as any} />
+            </div>
+          )}
 
           {/* Widget Usage */}
           <WidgetMetrics widgetUsage={data.widgetUsage} />
 
-          {/* Conversion Metrics */}
-          <ConversionMetrics conversion={data.conversion} />
-
-          {/* Revenue Charts */}
-          <RevenueCharts revenue={data.revenue} />
+          {/* Video Source Distribution */}
+          <VideoSourceChart videoSource={data.videoSource} />
         </>
       )}
     </div>

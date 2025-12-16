@@ -40,17 +40,6 @@ export function MetricCard({ label, metric, type = 'number', color }: MetricCard
       }}>
         {formatValue(metric.value, type)}
       </p>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span
-          style={badgeStyle(isPositive)}
-          aria-label={`${isPositive ? 'Increased' : 'Decreased'} by ${Math.abs(metric.changePercent).toFixed(1)}%`}
-        >
-          {changeIcon} {formatPercent(Math.abs(metric.changePercent))}
-        </span>
-        <span style={{ fontSize: '13px', color: COLORS.textMuted }}>
-          vs previous
-        </span>
-      </div>
     </div>
   );
 }

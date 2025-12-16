@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { SparkLineChart, PolarisVizProvider } from '@shopify/polaris-viz';
+import { ResponsiveLine } from '@nivo/line';
 import type { ConversionMetrics as ConversionMetricsType } from '@/types/survey-metrics';
 import { COLORS, RADIUS, SHADOWS, SPACING, formatPercent } from '@/lib/constants';
 import { gridResponsive, badgeStyle } from '@/lib/styles';
@@ -47,7 +47,12 @@ function ConversionMetricCard({
   const changeIcon = isPositive ? '↑' : '↓';
 
   const sparklineData = useMemo(
-    () => [{ data: metric.timeSeries.map((d) => ({ key: d.date, value: d.value })) }],
+    () => [
+      {
+        id: label,
+        data: metric.timeSeries.map((d) => ({ x: d.date, y: d.value })),
+      },
+    ],
     [metric.timeSeries]
   );
 
@@ -95,13 +100,20 @@ function ConversionMetricCard({
 
       {/* Sparkline */}
       <div style={{ height: '40px' }}>
-        <PolarisVizProvider>
-          <SparkLineChart
-            data={sparklineData}
-            theme="Light"
-            accessibilityLabel={`${label} trend`}
-          />
-        </PolarisVizProvider>
+        <ResponsiveLine
+          data={sparklineData}
+          margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
+          xScale={{ type: 'point' }}
+          yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
+          axisBottom={null}
+          axisLeft={null}
+          enableGridX={false}
+          enableGridY={false}
+          colors={[color]}
+          lineWidth={2}
+          pointSize={0}
+          useMesh
+        />
       </div>
     </div>
   );

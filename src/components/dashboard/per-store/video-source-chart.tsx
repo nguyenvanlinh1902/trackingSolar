@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { DonutChart, PolarisVizProvider } from '@shopify/polaris-viz';
+import { ResponsivePie } from '@nivo/pie';
 import type { VideoSourceMetrics } from '@/types/survey-metrics';
 import { COLORS, RADIUS, SPACING } from '@/lib/constants';
 import { cardStyle, sectionTitleStyle } from '@/lib/styles';
@@ -19,34 +19,45 @@ interface VideoSourceChartProps {
 
 export function VideoSourceChart({ videoSource }: VideoSourceChartProps) {
   const donutData = useMemo(() => {
-    return [
+    if (!videoSource) {
+      return [];
+    }
+    
+    const tiktok = typeof videoSource.tiktok === 'number' ? videoSource.tiktok : 0;
+    const instagram = typeof videoSource.instagram === 'number' ? videoSource.instagram : 0;
+    const upload = typeof videoSource.upload === 'number' ? videoSource.upload : 0;
+    
+    const data = [
       {
-        name: 'Video Source Distribution',
-        data: [
-          {
-            key: 'tiktok',
-            name: 'TikTok',
-            value: videoSource.tiktok,
-            color: VIDEO_SOURCE_COLORS.tiktok,
-          },
-          {
-            key: 'instagram',
-            name: 'Instagram',
-            value: videoSource.instagram,
-            color: VIDEO_SOURCE_COLORS.instagram,
-          },
-          {
-            key: 'upload',
-            name: 'Direct Upload',
-            value: videoSource.upload,
-            color: VIDEO_SOURCE_COLORS.upload,
-          },
-        ],
+        key: 'tiktok',
+        name: 'TikTok',
+        value: tiktok,
+        color: VIDEO_SOURCE_COLORS.tiktok,
       },
-    ];
+      {
+        key: 'instagram',
+        name: 'Instagram',
+        value: instagram,
+        color: VIDEO_SOURCE_COLORS.instagram,
+      },
+      {
+        key: 'upload',
+        name: 'Direct Upload',
+        value: upload,
+        color: VIDEO_SOURCE_COLORS.upload,
+      },
+    ].filter(item => item.value > 0); // Only show sources with count > 0
+    
+    return data;
   }, [videoSource]);
 
-  const totalVideos = videoSource.total || videoSource.tiktok + videoSource.instagram + videoSource.upload;
+  const totalVideos = useMemo(() => {
+    if (!videoSource) return 0;
+    return videoSource.total || 
+           ((typeof videoSource.tiktok === 'number' ? videoSource.tiktok : 0) +
+            (typeof videoSource.instagram === 'number' ? videoSource.instagram : 0) +
+            (typeof videoSource.upload === 'number' ? videoSource.upload : 0));
+  }, [videoSource]);
 
   return (
     <div style={cardStyle}>
@@ -54,11 +65,44 @@ export function VideoSourceChart({ videoSource }: VideoSourceChartProps) {
 
       <div style={{ display: 'flex', gap: `${SPACING.xl}px`, alignItems: 'center', flexWrap: 'wrap' }}>
         {/* Donut Chart */}
-        <div style={{ flex: '1 1 200px', minWidth: '200px', height: '200px' }}>
-          <PolarisVizProvider>
-            <DonutChart data={donutData} theme="Light" legendPosition="right" />
-          </PolarisVizProvider>
-        </div>
+        {donutData && donutData.length > 0 ? (
+          <div style={{ flex: '1 1 200px', minWidth: '200px', height: '200px' }}>
+            <ResponsivePie
+              data={donutData.map((d) => ({
+                id: d.key,
+                label: d.name,
+                value: d.value,
+                color: d.color,
+              }))}
+              margin={{ top: 10, right: 60, bottom: 10, left: 10 }}
+              innerRadius={0.6}
+              padAngle={1}
+              cornerRadius={3}
+              colors={(datum) => (datum.data.color as string)}
+              enableArcLabels={false}
+              arcLinkLabelsSkipAngle={10}
+              legends={[
+                {
+                  anchor: 'right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 16,
+                  translateY: 0,
+                  itemsSpacing: 4,
+                  itemWidth: 80,
+                  itemHeight: 18,
+                  itemTextColor: COLORS.textSecondary,
+                  symbolSize: 10,
+                  symbolShape: 'circle',
+                },
+              ]}
+            />
+          </div>
+        ) : (
+          <div style={{ flex: '1 1 200px', minWidth: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: COLORS.textMuted }}>
+            No video data available
+          </div>
+        )}
 
         {/* Stats summary */}
         <div style={{ flex: '1 1 150px' }}>
@@ -85,18 +129,22 @@ export function VideoSourceChart({ videoSource }: VideoSourceChartProps) {
 
             {/* Breakdown */}
             <div style={{ fontSize: '13px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: VIDEO_SOURCE_COLORS.tiktok }}>TikTok</span>
-                <span style={{ color: COLORS.textSecondary }}>{videoSource.tiktok}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: VIDEO_SOURCE_COLORS.instagram }}>Instagram</span>
-                <span style={{ color: COLORS.textSecondary }}>{videoSource.instagram}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: VIDEO_SOURCE_COLORS.upload }}>Direct Upload</span>
-                <span style={{ color: COLORS.textSecondary }}>{videoSource.upload}</span>
-              </div>
+              {videoSource && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ color: VIDEO_SOURCE_COLORS.tiktok }}>TikTok</span>
+                    <span style={{ color: COLORS.textSecondary }}>{typeof videoSource.tiktok === 'number' ? videoSource.tiktok : 0}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ color: VIDEO_SOURCE_COLORS.instagram }}>Instagram</span>
+                    <span style={{ color: COLORS.textSecondary }}>{typeof videoSource.instagram === 'number' ? videoSource.instagram : 0}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: VIDEO_SOURCE_COLORS.upload }}>Direct Upload</span>
+                    <span style={{ color: COLORS.textSecondary }}>{typeof videoSource.upload === 'number' ? videoSource.upload : 0}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

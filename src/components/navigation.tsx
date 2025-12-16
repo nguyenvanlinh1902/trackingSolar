@@ -7,7 +7,7 @@ interface NavigationProps {
 
 export function Navigation({ variant = 'default' }: NavigationProps) {
   const navigate = useNavigate()
-  useLocation() // Track location for potential future use
+  const location = useLocation()
   const { user, signOut } = useAuth()
 
   const handleNavigate = (path: string) => {
@@ -43,6 +43,9 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
   }
 
   if (variant === 'dashboard') {
+    const isAnalyticsPage = location.pathname === '/dashboard/analytics'
+    const isPerStorePage = location.pathname === '/dashboard/per-store'
+
     return (
       <header className="nav-dashboard">
         <div className="nav-dashboard__inner">
@@ -54,6 +57,42 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
               </svg>
             </div>
             <span className="nav-dashboard__logo-text">TaskFlow</span>
+          </div>
+
+          {/* Dashboard Navigation Links */}
+          <div className="nav-dashboard__links" style={{ display: 'flex', gap: '8px', marginLeft: '24px' }}>
+            <button
+              onClick={() => handleNavigate('/dashboard/analytics')}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                backgroundColor: isAnalyticsPage ? 'rgba(255,255,255,0.2)' : 'transparent',
+                color: '#ffffff',
+                transition: 'background-color 0.2s',
+              }}
+            >
+              All Stores
+            </button>
+            <button
+              onClick={() => handleNavigate('/dashboard/per-store')}
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                backgroundColor: isPerStorePage ? 'rgba(255,255,255,0.2)' : 'transparent',
+                color: '#ffffff',
+                transition: 'background-color 0.2s',
+              }}
+            >
+              Per Store
+            </button>
           </div>
 
           <nav className="nav-dashboard__nav">
