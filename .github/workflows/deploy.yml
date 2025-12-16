@@ -9,7 +9,7 @@ on:
 jobs:
   buildAndDeploy:
     runs-on: ubuntu-latest
-    environment: VITE_FIREBASE_API_KEY
+    environment: VITE_PUBLIC_FIREBASE_API_KEY
     
     steps:
     - name: Checkout code
