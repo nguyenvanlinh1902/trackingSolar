@@ -2,47 +2,44 @@ name: Deploy to Firebase
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  deploy:
+  buildAndDeploy:
     runs-on: ubuntu-latest
+    environment: VITE_FIREBASE_API_KEY
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Build project
-        run: yarn build
-        env:
-          VITE_SHOPABLE_API_URL: ${{ secrets.VITE_SHOPABLE_API_URL }}
-          VITE_ADMIN_API_KEY: ${{ secrets.VITE_ADMIN_API_KEY }}
-          VITE_PUBLIC_FIREBASE_API_KEY: ${{ secrets.VITE_PUBLIC_FIREBASE_API_KEY }}
-          VITE_PUBLIC_FIREBASE_APP_ID: ${{ secrets.VITE_PUBLIC_FIREBASE_APP_ID }}
-          VITE_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.VITE_PUBLIC_FIREBASE_PROJECT_ID }}
-          VITE_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_PUBLIC_FIREBASE_STORAGE_BUCKET }}
-
-      - name: Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
-
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+      
+    - name: Build project
+      run: yarn run build
+      env:
+        VITE_SHOPABLE_API_URL: ${{ vars.VITE_SHOPABLE_API_URL }}
+        VITE_ADMIN_API_KEY: ${{ vars.VITE_ADMIN_API_KEY }}
+        VITE_PUBLIC_FIREBASE_API_KEY: ${{ vars.VITE_PUBLIC_FIREBASE_API_KEY }}
+        VITE_PUBLIC_FIREBASE_APP_ID: ${{ vars.VITE_PUBLIC_FIREBASE_APP_ID }}
+        VITE_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+        VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+        VITE_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.VITE_PUBLIC_FIREBASE_PROJECT_ID }}
+        VITE_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+      
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+      
+    - name: Deploy to Firebase
+      run: |
+        firebase use profilelinhnv --token ${{ vars.FIREBASE_DEPLOY_KEY }}
+        firebase deploy --only hosting --token ${{ vars.FIREBASE_DEPLOY_KEY }}
