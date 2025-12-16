@@ -42,5 +42,6 @@ jobs:
     - name: Deploy to Firebase
       env:
         FIREBASE_TOKEN: ${{ vars.FIREBASE_DEPLOY_KEY }}
+        FIREBASE_PROJECT_ID: ${{ vars.VITE_PUBLIC_FIREBASE_PROJECT_ID }}
       run: |
-        firebase deploy --only hosting --token $FIREBASE_TOKEN
+        firebase deploy --only hosting --project $FIREBASE_PROJECT_ID --token $FIREBASE_TOKEN
