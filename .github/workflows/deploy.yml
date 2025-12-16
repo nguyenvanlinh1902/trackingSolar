@@ -41,12 +41,13 @@ jobs:
       
     - name: Deploy to Firebase
       env:
-        FIREBASE_TOKEN: ${{ vars.FIREBASE_DEPLOY_KEY || secrets.FIREBASE_DEPLOY_KEY }}
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_DEPLOY_KEY }}
         FIREBASE_PROJECT_ID: ${{ vars.VITE_PUBLIC_FIREBASE_PROJECT_ID }}
       run: |
         if [ -z "$FIREBASE_TOKEN" ] || [ "$FIREBASE_TOKEN" == "" ]; then
           echo "Error: FIREBASE_TOKEN is not set"
-          echo "Please set FIREBASE_DEPLOY_KEY in GitHub Environment Variables (vars) or Secrets (secrets)"
+          echo "Please set FIREBASE_DEPLOY_KEY in GitHub Environment Secrets"
+          echo "Settings → Environments → VITE_FIREBASE_API_KEY → Add environment secret"
           exit 1
         fi
         if [ -z "$FIREBASE_PROJECT_ID" ] || [ "$FIREBASE_PROJECT_ID" == "" ]; then
