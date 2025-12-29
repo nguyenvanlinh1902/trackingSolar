@@ -3,16 +3,14 @@
 import { CHART_COLORS } from '@/lib/constants';
 import { gridResponsive } from '@/lib/styles';
 import { MetricCard } from './metric-card';
-import type { AnalyticsData } from '@/services/analytics-service';
+import type { AnalyticsMetric } from '@/services/analytics-service';
 
 interface SummaryMetricsGridProps {
-  summary: AnalyticsData['summary'];
+  summary: Record<string, AnalyticsMetric>;
 }
 
 const METRICS_CONFIG = [
-  { key: 'totalViews', label: 'Total Views', type: 'number' as const, color: CHART_COLORS.views },
-  { key: 'totalLikes', label: 'Total Likes', type: 'number' as const, color: CHART_COLORS.likes },
-  { key: 'totalShares', label: 'Total Shares', type: 'number' as const, color: CHART_COLORS.shares },
+  { key: 'totalViews', label: 'Total Views', type: 'number' as const, color: CHART_COLORS.views }
 ] as const;
 
 export function SummaryMetricsGrid({ summary }: SummaryMetricsGridProps) {

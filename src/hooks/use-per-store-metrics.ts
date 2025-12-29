@@ -5,32 +5,32 @@ import { getPerStoreMetricsByDomain } from '@/services/analytics-service';
 import type { PerStoreMetricsData } from '@/types/survey-metrics';
 
 interface UsePerStoreMetricsReturn {
-  data: PerStoreMetricsData | null;
+  data: any | null;
   loading: boolean;
   error: string | null;
-  searchByDomain: (domain: string) => Promise<void>;
+  searchByDomain: (shopId: string, startDate?: string, endDate?: string) => Promise<void>;
 }
 
 /**
- * Hook for fetching per store metrics by domain
- * - No stores list fetching
- * - Search by domain to fetch metrics
+ * Hook for fetching per store metrics by shop ID
+ * - Search by shop ID to fetch stats
+ * - Optional date range filtering
  */
 export function usePerStoreMetrics(): UsePerStoreMetricsReturn {
-  const [data, setData] = useState<PerStoreMetricsData | null>(null);
+  const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const searchByDomain = async (domain: string) => {
-    if (!domain.trim()) {
-      setError('Please enter a domain');
+  const searchByDomain = async (shopId: string, startDate?: string, endDate?: string) => {
+    if (!shopId.trim()) {
+      setError('Please enter a shop ID');
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      const result = await getPerStoreMetricsByDomain(domain.trim());
+      const result = await getPerStoreMetricsByDomain(shopId.trim(), startDate, endDate);
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load store metrics');

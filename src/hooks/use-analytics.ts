@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAnalytics, type AnalyticsData, type PeriodType } from '@/services/analytics-service';
+import { getAggregateStats } from '@/services/analytics-service';
 
-export function useAnalytics(initialPeriod: PeriodType = 'THIS_WEEK') {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
-  const [period, setPeriod] = useState<PeriodType>(initialPeriod);
+export function useAnalytics() {
+  const [analyticsData, setAnalyticsData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,7 +13,7 @@ export function useAnalytics(initialPeriod: PeriodType = 'THIS_WEEK') {
       try {
         setLoading(true);
         setError(null);
-        const data = await getAnalytics(period);
+        const data = await getAggregateStats();
         setAnalyticsData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load analytics data');
@@ -24,12 +23,10 @@ export function useAnalytics(initialPeriod: PeriodType = 'THIS_WEEK') {
       }
     }
     fetchData();
-  }, [period]);
+  }, []);
 
   return {
     analyticsData,
-    period,
-    setPeriod,
     loading,
     error,
   };

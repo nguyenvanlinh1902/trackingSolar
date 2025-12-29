@@ -5,7 +5,23 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Float, Stars } from '@react-three/drei';
 import { FloatingCard } from './floating-card';
 import { CHART_COLORS, formatNumber, formatPercent, formatCurrency } from '@/lib/constants';
-import type { AnalyticsData } from '@/services/analytics-service';
+
+interface MetricValue {
+  value: number;
+  changePercent: number;
+}
+
+interface SummaryData {
+  totalViews: MetricValue;
+  totalLikes: MetricValue;
+  totalShares: MetricValue;
+  engagementRate: MetricValue;
+  revenue: MetricValue;
+}
+
+interface AnalyticsSceneProps {
+  data: Record<string, unknown>;
+}
 
 // Scene configuration
 const CAMERA_CONFIG = { position: [0, 0, 8] as [number, number, number], fov: 50 };
@@ -29,10 +45,6 @@ const FLOAT_SPEEDS: Record<string, number> = {
   revenue: 1.4,
 };
 
-interface AnalyticsSceneProps {
-  data: AnalyticsData;
-}
-
 interface CardData {
   id: string;
   title: string;
@@ -44,7 +56,7 @@ interface CardData {
 }
 
 export function AnalyticsScene({ data }: AnalyticsSceneProps) {
-  const { summary } = data;
+  const { summary } = data as unknown as { summary: SummaryData };
 
   // Memoize card data to prevent recalculation on each render
   const cards = useMemo<CardData[]>(
@@ -57,24 +69,6 @@ export function AnalyticsScene({ data }: AnalyticsSceneProps) {
         color: CHART_COLORS.views,
         position: CARD_POSITIONS.views,
         speed: FLOAT_SPEEDS.views,
-      },
-      {
-        id: 'likes',
-        title: 'Total Likes',
-        value: formatNumber(summary.totalLikes.value),
-        change: summary.totalLikes.changePercent,
-        color: CHART_COLORS.likes,
-        position: CARD_POSITIONS.likes,
-        speed: FLOAT_SPEEDS.likes,
-      },
-      {
-        id: 'shares',
-        title: 'Total Shares',
-        value: formatNumber(summary.totalShares.value),
-        change: summary.totalShares.changePercent,
-        color: CHART_COLORS.shares,
-        position: CARD_POSITIONS.shares,
-        speed: FLOAT_SPEEDS.shares,
       },
       {
         id: 'engagement',

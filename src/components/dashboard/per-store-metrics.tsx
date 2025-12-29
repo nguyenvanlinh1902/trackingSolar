@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { PerStoreMetricsData } from '@/types/survey-metrics';
 import { COLORS, RADIUS, SPACING } from '@/lib/constants';
 import {
@@ -7,6 +8,8 @@ import {
   WidgetMetrics,
 } from './per-store';
 import { LoadingSpinner, ErrorMessage, SummaryMetricsGrid } from './shopvid';
+import { DaybreakChart } from '@/components/dashboard/all-stores';
+import { usePerStoreDaybreak } from '@/hooks/use-per-store-daybreak';
 
 interface PerStoreMetricsProps {
   data: PerStoreMetricsData | null;
@@ -21,6 +24,14 @@ export function PerStoreMetrics({
   loading,
   error,
 }: PerStoreMetricsProps) {
+  const [dateRange, setDateRange] = useState<{ start?: string; end?: string }>({});
+
+  const {
+    data: daybreakData,
+    loading: daybreakLoading,
+    error: daybreakError,
+  } = usePerStoreDaybreak(selectedStoreId, dateRange.start, dateRange.end);
+
   return (
     <div style={{ display: 'grid', gap: `${SPACING.xl}px` }}>
       {/* Empty State - No store selected */}
@@ -114,6 +125,20 @@ export function PerStoreMetrics({
 
           {/* Video Source Distribution */}
           <VideoSourceChart videoSource={data.videoSource} />
+
+          {/* Time Series Analysis for this store */}
+          <DaybreakChart
+            data={daybreakData}
+            loading={daybreakLoading}
+            onDateRangeChange={(startDate, endDate) =>
+              setDateRange({ start: startDate, end: endDate })
+            }
+          />
+
+          {/* Optional: show daybreak error below the chart */}
+          {daybreakError && (
+            <ErrorMessage message={daybreakError} />
+          )}
         </>
       )}
     </div>

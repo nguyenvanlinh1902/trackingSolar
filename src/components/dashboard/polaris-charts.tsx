@@ -1,9 +1,7 @@
 'use client';
 
-import type { AnalyticsData } from '@/services/analytics-service';
-
 interface PolarisChartsProps {
-  data: AnalyticsData;
+  data: any;
 }
 
 export function PolarisCharts(_props: PolarisChartsProps) {
