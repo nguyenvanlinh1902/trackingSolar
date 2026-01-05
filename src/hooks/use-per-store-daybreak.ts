@@ -31,7 +31,7 @@ export function usePerStoreDaybreak(
       try {
         setLoading(true);
         setError(null);
-        const result = await getPerStoreMetrics(domain, startDate, endDate);
+        const result = await getPerStoreMetrics(domain as string, startDate, endDate);
 
         const daybreakData = transformPerStoreDaybreakResponse(result as Record<string, unknown>);
         setData(daybreakData);

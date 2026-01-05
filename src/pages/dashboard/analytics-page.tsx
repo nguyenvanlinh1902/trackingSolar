@@ -21,7 +21,7 @@ function AnalyticsDashboardContent() {
       end: today.toISOString().split('T')[0],
     }
   })
-  const { data: daybreakData, loading: daybreakLoading, error: daybreakError } = useDaybreakAnalytics(dateRange.start, dateRange.end)
+  const { data: daybreakData, loading: daybreakLoading } = useDaybreakAnalytics(dateRange.start, dateRange.end)
   const navigate = useNavigate()
 
   const isLoading = loading || allStoresLoading
@@ -133,7 +133,7 @@ function AnalyticsDashboardContent() {
           <DaybreakChart
             data={daybreakData}
             loading={daybreakLoading}
-            onDateRangeChange={(startDate, endDate) => setDateRange({ start: startDate, end: endDate })}
+            onDateRangeChange={(startDate: string, endDate: string) => setDateRange({ start: startDate, end: endDate })}
           />
         </div>
       </div>

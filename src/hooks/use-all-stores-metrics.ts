@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { getAggregateStats } from '@/services/analytics-service';
-import type { SurveyMetricsData } from '@/types/survey-metrics';
 
 export function useAllStoresMetrics(startDate?: string, endDate?: string) {
   const [data, setData] = useState<any | null>(null);

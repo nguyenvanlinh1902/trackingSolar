@@ -130,7 +130,7 @@ export function PerStoreMetrics({
           <DaybreakChart
             data={daybreakData}
             loading={daybreakLoading}
-            onDateRangeChange={(startDate, endDate) =>
+            onDateRangeChange={(startDate: string, endDate: string) =>
               setDateRange({ start: startDate, end: endDate })
             }
           />

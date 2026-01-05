@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { getPerStoreMetricsByDomain } from '@/services/analytics-service';
-import type { PerStoreMetricsData } from '@/types/survey-metrics';
 
 interface UsePerStoreMetricsReturn {
   data: any | null;
