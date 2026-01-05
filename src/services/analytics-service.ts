@@ -168,6 +168,8 @@ function transformAggregateStatsResponse(data: ApiAggregateStatsResponse): Recor
   const totalWidgets = widgetStats?.totalWidgets || 0;
   const activeWidgets = widgetStats?.activeWidgets || 0;
   
+  const totalShops = data.totalShops || 0;
+
   const widgetUsage: WidgetUsageMetrics = {
     widgetTypes: [
       { type: 'Highlighted carousel', count: layoutBreakdown.highlighted_carousel || 0 },
@@ -176,11 +178,11 @@ function transformAggregateStatsResponse(data: ApiAggregateStatsResponse): Recor
       { type: 'Grid', count: layoutBreakdown.grid || 0 },
       { type: 'Story', count: layoutBreakdown.story || 0 },
     ].filter(w => w.count > 0),
-    avgWidgetsPerMerchant: widgetStats?.totalActiveMerchants && widgetStats.totalActiveMerchants > 0 
-      ? totalWidgets / widgetStats.totalActiveMerchants 
+    avgWidgetsPerMerchant: totalShops > 0
+      ? totalWidgets / totalShops
       : 0,
-    avgActiveWidgetsPerMerchant: widgetStats?.totalActiveMerchants && widgetStats.totalActiveMerchants > 0 
-      ? activeWidgets / widgetStats.totalActiveMerchants 
+    avgActiveWidgetsPerMerchant: totalShops > 0
+      ? activeWidgets / totalShops
       : 0,
     ctaActions: [
       {
