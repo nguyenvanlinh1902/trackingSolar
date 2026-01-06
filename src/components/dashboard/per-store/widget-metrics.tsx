@@ -103,7 +103,7 @@ export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
             </p>
           </div>
 
-          {/* Average Widgets Per Merchant */}
+          {/* Active Widgets */}
           <div
             style={{
               padding: `${SPACING.lg}px`,
@@ -120,7 +120,7 @@ export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
                 fontWeight: 500,
               }}
             >
-              Avg Widgets/Merchant
+              Active Widgets
             </p>
             <p
               style={{
@@ -129,17 +129,17 @@ export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
                 color: COLORS.textPrimary,
               }}
             >
-              {widgetUsage.avgWidgetsPerMerchant.toFixed(1)}
+              {Math.round(widgetUsage.avgActiveWidgetsPerMerchant)}
             </p>
           </div>
 
-          {/* Average Active Widgets Per Merchant */}
+          {/* Inactive Widgets */}
           <div
             style={{
               padding: `${SPACING.lg}px`,
               backgroundColor: COLORS.gray50,
               borderRadius: RADIUS.lg,
-              borderLeft: `4px solid ${COLORS.info}`,
+              borderLeft: `4px solid ${COLORS.textMuted}`,
             }}
           >
             <p
@@ -150,7 +150,7 @@ export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
                 fontWeight: 500,
               }}
             >
-              Avg Active Widgets/Merchant
+              Inactive Widgets
             </p>
             <p
               style={{
@@ -159,7 +159,7 @@ export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
                 color: COLORS.textPrimary,
               }}
             >
-              {widgetUsage.avgActiveWidgetsPerMerchant.toFixed(1)}
+              {totalWidgets - Math.round(widgetUsage.avgActiveWidgetsPerMerchant)}
             </p>
           </div>
         </div>

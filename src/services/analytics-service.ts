@@ -740,7 +740,6 @@ export async function getPerStoreMetricsByDomain(
 
     // Parse videos data - FIXED: Use sum of counts for total, not totalViews
     const platformCounts = widgetsData.videoStats || {};
-    alert(JSON.stringify(platformCounts));
     const videoSource: VideoSourceMetrics = {
       tiktok: platformCounts.tiktok || 0,
       instagram: platformCounts.instagram || 0,
