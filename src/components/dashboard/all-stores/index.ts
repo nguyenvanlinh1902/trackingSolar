@@ -3,7 +3,6 @@
  */
 
 // Main components (use context)
-export { AllStoresHeader } from './all-stores-header';
 export { VideoSourceMetrics } from './video-source-tracking';
 export { WidgetUsageMetrics } from './widget-usage-metrics';
 
