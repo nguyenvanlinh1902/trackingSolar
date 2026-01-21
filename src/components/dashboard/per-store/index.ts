@@ -3,6 +3,7 @@
  */
 
 // Main components (legacy - consider using charts/* instead)
+export { PerStoreHeader } from './per-store-header';
 export { StoreSelector } from './store-selector';
 export { VideoSourceChart } from './video-source-chart';
 export { VideoTrend } from './video-trend';

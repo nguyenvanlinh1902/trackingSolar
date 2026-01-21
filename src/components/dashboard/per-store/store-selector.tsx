@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { COLORS, RADIUS, SPACING, TRANSITIONS } from '@/lib/constants';
 
 interface StoreSelectorProps {
   selectedDomain: string | null;
@@ -49,41 +48,33 @@ export function StoreSelector({
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '400px' }}>
-      <label
-        style={{
-          display: 'block',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: COLORS.textSecondary,
-          marginBottom: `${SPACING.sm}px`,
-        }}
-      >
-        Search Store
-      </label>
-
+    <div style={{ width: '100%' }}>
       {/* Input field with Search button */}
-      <div style={{ display: 'flex', gap: `${SPACING.sm}px` }}>
+      <div style={{ display: 'flex', gap: '8px' }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Enter store domain (e.g., store.myshopify.com)"
+            placeholder="Search store domain..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             disabled={loading || isSearching}
             style={{
               width: '100%',
-              padding: `${SPACING.md}px ${SPACING.lg}px`,
-              paddingRight: selectedDomain ? '80px' : `${SPACING.lg}px`,
+              padding: '10px 16px',
+              paddingRight: selectedDomain ? '40px' : '16px',
               fontSize: '14px',
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: RADIUS.lg,
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '12px',
               outline: 'none',
-              backgroundColor: loading || isSearching ? COLORS.gray100 : COLORS.white,
-              color: COLORS.textPrimary,
-              transition: `all ${TRANSITIONS.normal}`,
+              backgroundColor: loading || isSearching
+                ? 'rgba(255, 255, 255, 0.05)'
+                : 'rgba(255, 255, 255, 0.1)',
+              color: '#FFFFFF',
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
             }}
           />
 
@@ -99,12 +90,13 @@ export function StoreSelector({
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: COLORS.textMuted,
-                fontSize: '18px',
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '20px',
                 padding: '4px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                lineHeight: 1,
               }}
               aria-label="Clear selection"
             >
@@ -118,16 +110,22 @@ export function StoreSelector({
           onClick={handleSearch}
           disabled={loading || isSearching || !searchTerm.trim()}
           style={{
-            padding: `${SPACING.md}px ${SPACING.lg}px`,
+            padding: '10px 20px',
             fontSize: '14px',
-            fontWeight: 500,
-            borderRadius: RADIUS.lg,
+            fontWeight: 600,
+            borderRadius: '12px',
             border: 'none',
             cursor: loading || isSearching || !searchTerm.trim() ? 'not-allowed' : 'pointer',
-            backgroundColor: loading || isSearching || !searchTerm.trim() ? COLORS.gray300 : COLORS.primary,
-            color: '#ffffff',
-            transition: `all ${TRANSITIONS.normal}`,
+            backgroundColor: loading || isSearching || !searchTerm.trim()
+              ? 'rgba(255, 255, 255, 0.1)'
+              : 'rgba(255, 255, 255, 0.2)',
+            color: loading || isSearching || !searchTerm.trim()
+              ? 'rgba(255, 255, 255, 0.4)'
+              : '#FFFFFF',
+            transition: 'all 0.2s ease',
             whiteSpace: 'nowrap',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
           }}
         >
           {isSearching ? 'Searching...' : 'Search'}
@@ -138,18 +136,19 @@ export function StoreSelector({
       {selectedDomain && (
         <div
           style={{
-            marginTop: `${SPACING.sm}px`,
-            padding: `${SPACING.sm}px ${SPACING.md}px`,
-            backgroundColor: COLORS.primaryLight + '15',
-            borderRadius: RADIUS.md,
-            fontSize: '13px',
-            color: COLORS.primary,
+            marginTop: '8px',
+            padding: '6px 12px',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: 'rgba(255, 255, 255, 0.9)',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
           }}
         >
-          <span style={{ fontWeight: 500 }}>{selectedDomain}</span>
+          <span style={{ fontWeight: 600 }}>📍 {selectedDomain}</span>
         </div>
       )}
     </div>
