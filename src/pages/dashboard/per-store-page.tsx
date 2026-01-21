@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { usePerStoreMetrics } from '@/hooks/use-per-store-metrics';
 import { PerStoreMetrics } from '@/components/dashboard/per-store-metrics';
-import { PerStoreHeader } from '@/components/dashboard/per-store';
+import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { COLORS } from '@/lib/constants';
 import { pageContainerStyle } from '@/lib/styles';
 
@@ -22,11 +22,14 @@ function PerStoreDashboardContent() {
     <main style={{ backgroundColor: COLORS.background, minHeight: '100vh' }}>
       <div style={pageContainerStyle}>
         {/* Header with Search */}
-        <PerStoreHeader
+        <DashboardHeader
+          title="Per Store Metrics"
+          subtitle="View detailed metrics for individual stores"
+          currentPage="per-store"
           selectedDomain={selectedDomain}
           onDomainChange={setSelectedDomain}
-          loading={loading}
           onSearch={handleSearch}
+          searchLoading={loading}
         />
 
         {/* Per Store Metrics */}

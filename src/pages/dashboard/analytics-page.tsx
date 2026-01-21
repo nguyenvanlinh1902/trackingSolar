@@ -1,8 +1,8 @@
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { AllStoresProvider, useAllStoresContext } from '@/contexts/all-stores-context';
 import { ErrorMessage } from '@/components/dashboard/shopvid';
+import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import {
-  AllStoresHeader,
   VideoUploadAnalytics,
   VideoSourceMetrics,
   WidgetUsageMetrics,
@@ -36,7 +36,12 @@ function AnalyticsDashboardContent() {
     <main className="dashboard">
       <div className="dashboard__container">
         {/* Header with navigation */}
-        <AllStoresHeader />
+        <DashboardHeader
+          title="All Stores Analytics"
+          subtitle="Comprehensive overview for all stores"
+          currentPage="all-stores"
+          totalShops={data.totalShops}
+        />
 
         {/* Dashboard Sections */}
         <div className="dashboard__charts" style={{ display: 'grid', gap: '24px' }}>
