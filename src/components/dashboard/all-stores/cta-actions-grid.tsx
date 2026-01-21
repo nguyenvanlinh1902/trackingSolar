@@ -69,7 +69,7 @@ function CtaActionCard({ action }: { action: CTAActionCount }) {
         {action.action}
       </p>
 
-      {/* Device breakdown */}
+      {/* Device breakdown with comparison bar */}
       <div style={{ display: 'flex', gap: `${SPACING.lg}px`, marginBottom: `${SPACING.md}px` }}>
         <div style={{ flex: 1 }}>
           <span style={{ fontSize: '11px', color: COLORS.textMuted, fontWeight: 600, textTransform: 'uppercase' }}>
@@ -99,6 +99,20 @@ function CtaActionCard({ action }: { action: CTAActionCount }) {
         </div>
       </div>
 
+      {/* Progress bar visualization - closer to totals */}
+      <div style={{ marginBottom: `${SPACING.md}px`, display: 'flex', gap: '2px', height: '4px', borderRadius: '2px', overflow: 'hidden' }}>
+        <div style={{
+          width: `${desktopPercentage}%`,
+          background: 'linear-gradient(90deg, #3B82F6, #2563EB)',
+          transition: 'width 0.5s ease',
+        }} />
+        <div style={{
+          width: `${mobilePercentage}%`,
+          background: 'linear-gradient(90deg, #8B5CF6, #7C3AED)',
+          transition: 'width 0.5s ease',
+        }} />
+      </div>
+
       {/* Total with visual separator */}
       <div style={{
         borderTop: '1px solid rgba(255, 255, 255, 0.1)',
@@ -115,20 +129,6 @@ function CtaActionCard({ action }: { action: CTAActionCount }) {
         }}>
           {total.toLocaleString()}
         </span>
-      </div>
-
-      {/* Progress bar visualization */}
-      <div style={{ marginTop: `${SPACING.md}px`, display: 'flex', gap: '2px', height: '4px', borderRadius: '2px', overflow: 'hidden' }}>
-        <div style={{
-          width: `${desktopPercentage}%`,
-          background: 'linear-gradient(90deg, #3B82F6, #2563EB)',
-          transition: 'width 0.5s ease',
-        }} />
-        <div style={{
-          width: `${mobilePercentage}%`,
-          background: 'linear-gradient(90deg, #8B5CF6, #7C3AED)',
-          transition: 'width 0.5s ease',
-        }} />
       </div>
     </div>
   );
