@@ -23,8 +23,6 @@ function PerStoreDashboardContent() {
       <div style={pageContainerStyle}>
         {/* Header with Search */}
         <DashboardHeader
-          title="Per Store Metrics"
-          subtitle="View detailed metrics for individual stores"
           currentPage="per-store"
           selectedDomain={selectedDomain}
           onDomainChange={setSelectedDomain}

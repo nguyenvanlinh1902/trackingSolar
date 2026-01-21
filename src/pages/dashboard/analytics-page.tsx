@@ -35,10 +35,8 @@ function AnalyticsDashboardContent() {
   return (
     <main className="dashboard">
       <div className="dashboard__container">
-        {/* Header with navigation */}
+        {/* Header with Total Shops */}
         <DashboardHeader
-          title="All Stores Analytics"
-          subtitle="Comprehensive overview for all stores"
           currentPage="all-stores"
           totalShops={data.totalShops}
         />

@@ -3,8 +3,6 @@
 import { useState, useRef } from 'react';
 
 interface DashboardHeaderProps {
-  title: string;
-  subtitle: string;
   currentPage: 'all-stores' | 'per-store';
   totalShops?: number;
   // Per Store search props
@@ -15,8 +13,6 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({
-  title,
-  subtitle,
   currentPage,
   totalShops,
   selectedDomain,
@@ -61,18 +57,16 @@ export function DashboardHeader({
     <div
       style={{
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        justifyContent: 'center',
+        alignItems: 'center',
         marginBottom: '32px',
-        padding: '32px',
+        padding: '24px',
         background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
         borderRadius: '20px',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1)',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         position: 'relative',
         overflow: 'hidden',
-        gap: '24px',
-        flexWrap: 'wrap',
       }}
     >
       {/* Animated gradient overlay */}
@@ -89,140 +83,123 @@ export function DashboardHeader({
         }}
       />
 
-      {/* Left Section: Title + Total Shops (All Stores only) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '32px', position: 'relative', zIndex: 1 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
-            {title}
-          </h1>
-          <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
-            {subtitle}
-          </p>
-        </div>
-
-        {/* Total Shops Card - All Stores only */}
-        {currentPage === 'all-stores' && totalShops !== undefined && (
+      {/* All Stores: Total Shops Card only */}
+      {currentPage === 'all-stores' && totalShops !== undefined && (
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <TotalShopsCard value={totalShops} />
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Right Section: Search (Per Store only) */}
+      {/* Per Store: Search only */}
       {currentPage === 'per-store' && onSearch && (
         <div style={{
-          display: 'flex',
-          gap: '24px',
-          alignItems: 'center',
           position: 'relative',
           zIndex: 1,
-          flex: '1 1 auto',
-          justifyContent: 'flex-end',
-          flexWrap: 'wrap',
+          width: '100%',
+          maxWidth: '500px',
         }}>
-          {/* Store Search */}
-          <div style={{ minWidth: '320px', maxWidth: '400px', width: '100%' }}>
-            {/* Input field with Search button */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search store domain..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  disabled={searchLoading || isSearching}
-                  style={{
-                    width: '100%',
-                    padding: '10px 16px',
-                    paddingRight: selectedDomain ? '40px' : '16px',
-                    fontSize: '14px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
-                    outline: 'none',
-                    backgroundColor: searchLoading || isSearching
-                      ? 'rgba(255, 255, 255, 0.05)'
-                      : 'rgba(255, 255, 255, 0.1)',
-                    color: '#FFFFFF',
-                    transition: 'all 0.2s ease',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                  }}
-                />
-
-                {/* Clear button */}
-                {selectedDomain && (
-                  <button
-                    onClick={handleClear}
-                    style={{
-                      position: 'absolute',
-                      right: '8px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      fontSize: '20px',
-                      padding: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      lineHeight: 1,
-                    }}
-                    aria-label="Clear selection"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-
-              {/* Search button */}
-              <button
-                onClick={handleSearch}
-                disabled={searchLoading || isSearching || !searchTerm.trim()}
+          {/* Input field with Search button */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search store domain..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress}
+                disabled={searchLoading || isSearching}
                 style={{
-                  padding: '10px 20px',
+                  width: '100%',
+                  padding: '10px 16px',
+                  paddingRight: selectedDomain ? '40px' : '16px',
                   fontSize: '14px',
-                  fontWeight: 600,
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '12px',
-                  border: 'none',
-                  cursor: searchLoading || isSearching || !searchTerm.trim() ? 'not-allowed' : 'pointer',
-                  backgroundColor: searchLoading || isSearching || !searchTerm.trim()
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : 'rgba(255, 255, 255, 0.2)',
-                  color: searchLoading || isSearching || !searchTerm.trim()
-                    ? 'rgba(255, 255, 255, 0.4)'
-                    : '#FFFFFF',
+                  outline: 'none',
+                  backgroundColor: searchLoading || isSearching
+                    ? 'rgba(255, 255, 255, 0.05)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  color: '#FFFFFF',
                   transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
                 }}
-              >
-                {isSearching ? 'Searching...' : 'Search'}
-              </button>
+              />
+
+              {/* Clear button */}
+              {selectedDomain && (
+                <button
+                  onClick={handleClear}
+                  style={{
+                    position: 'absolute',
+                    right: '8px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: '20px',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    lineHeight: 1,
+                  }}
+                  aria-label="Clear selection"
+                >
+                  ×
+                </button>
+              )}
             </div>
 
-            {/* Selected domain badge */}
-            {selectedDomain && (
-              <div
-                style={{
-                  marginTop: '8px',
-                  padding: '6px 12px',
-                  backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                  borderRadius: '8px',
-                  fontSize: '12px',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                }}
-              >
-                <span style={{ fontWeight: 600 }}>📍 {selectedDomain}</span>
-              </div>
-            )}
+            {/* Search button */}
+            <button
+              onClick={handleSearch}
+              disabled={searchLoading || isSearching || !searchTerm.trim()}
+              style={{
+                padding: '10px 20px',
+                fontSize: '14px',
+                fontWeight: 600,
+                borderRadius: '12px',
+                border: 'none',
+                cursor: searchLoading || isSearching || !searchTerm.trim() ? 'not-allowed' : 'pointer',
+                backgroundColor: searchLoading || isSearching || !searchTerm.trim()
+                  ? 'rgba(255, 255, 255, 0.1)'
+                  : 'rgba(255, 255, 255, 0.2)',
+                color: searchLoading || isSearching || !searchTerm.trim()
+                  ? 'rgba(255, 255, 255, 0.4)'
+                  : '#FFFFFF',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+              }}
+            >
+              {isSearching ? 'Searching...' : 'Search'}
+            </button>
           </div>
+
+          {/* Selected domain badge */}
+          {selectedDomain && (
+            <div
+              style={{
+                marginTop: '8px',
+                padding: '6px 12px',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.9)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+              }}
+            >
+              <span style={{ fontWeight: 600 }}>📍 {selectedDomain}</span>
+            </div>
+          )}
         </div>
       )}
     </div>
