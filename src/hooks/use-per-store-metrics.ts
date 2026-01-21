@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { getPerStoreMetricsByDomain } from '@/services/analytics-service';
 
 interface UsePerStoreMetricsReturn {
@@ -11,38 +12,44 @@ interface UsePerStoreMetricsReturn {
 }
 
 /**
- * Hook for fetching per store metrics by shop ID
+ * Hook for fetching per store metrics by shop ID using React Query
  * - Search by shop ID to fetch stats
  * - Optional date range filtering
  */
 export function usePerStoreMetrics(): UsePerStoreMetricsReturn {
   const [data, setData] = useState<any | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      shopId,
+      startDate,
+      endDate,
+    }: {
+      shopId: string;
+      startDate?: string;
+      endDate?: string;
+    }) => {
+      if (!shopId.trim()) {
+        throw new Error('Please enter a shop ID');
+      }
+      return await getPerStoreMetricsByDomain(shopId.trim(), startDate, endDate);
+    },
+    onSuccess: (result) => {
+      setData(result);
+    },
+    onError: () => {
+      setData(null);
+    },
+  });
 
   const searchByDomain = async (shopId: string, startDate?: string, endDate?: string) => {
-    if (!shopId.trim()) {
-      setError('Please enter a shop ID');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await getPerStoreMetricsByDomain(shopId.trim(), startDate, endDate);
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load store metrics');
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
+    await mutation.mutateAsync({ shopId, startDate, endDate });
   };
 
   return {
     data,
-    loading,
-    error,
+    loading: mutation.isPending,
+    error: mutation.error?.message ?? null,
     searchByDomain,
   };
 }

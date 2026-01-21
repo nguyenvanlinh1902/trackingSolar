@@ -2,7 +2,7 @@
 
 import { useMemo, CSSProperties, useState } from 'react';
 import { COLORS, RADIUS, SPACING } from '@/lib/constants';
-import { useAllStoresContextOptional } from '@/contexts/all-stores-context';
+import { useAllStoresContext } from '@/contexts/all-stores-context';
 import {
   glassCardStyle,
   sectionHeaderStyle,
@@ -161,8 +161,8 @@ function MetricCard({ metric }: MetricCardProps) {
 }
 
 export function VideoUploadAnalytics() {
-  const ctx = useAllStoresContextOptional();
-  const metrics = useMetricsData(ctx?.loading ?? false, ctx?.data ?? null);
+  const ctx = useAllStoresContext();
+  const metrics = useMetricsData(ctx.loading, ctx.data);
 
   return (
     <div style={glassCardStyle}>

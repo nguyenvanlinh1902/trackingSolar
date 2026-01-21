@@ -5,8 +5,9 @@ import LoginPage from './pages/login-page'
 import AnalyticsPage from './pages/dashboard/analytics-page'
 import PerStorePage from './pages/dashboard/per-store-page'
 import { useState } from 'react'
-import { AllStoresProvider, useAllStoresContext } from './contexts/all-stores-context'
+import { useAllStoresContext } from './contexts/all-stores-context'
 import { usePerStoreMetrics } from './hooks/use-per-store-metrics'
+import { ReactQueryProvider } from './lib/react-query'
 
 function AnalyticsLayout({ children }: { children: React.ReactNode }) {
   const { data } = useAllStoresContext()
@@ -47,28 +48,28 @@ function PerStoreLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/dashboard" element={<Navigate to="/dashboard/analytics" replace />} />
-      <Route
-        path="/dashboard/analytics"
-        element={
-          <AllStoresProvider>
+    <ReactQueryProvider>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Navigate to="/dashboard/analytics" replace />} />
+        <Route
+          path="/dashboard/analytics"
+          element={
             <AnalyticsLayout>
               <AnalyticsPage />
             </AnalyticsLayout>
-          </AllStoresProvider>
-        }
-      />
-      <Route
-        path="/dashboard/per-store"
-        element={
-          <PerStoreLayout>
-            <PerStorePage />
-          </PerStoreLayout>
-        }
-      />
-    </Routes>
+          }
+        />
+        <Route
+          path="/dashboard/per-store"
+          element={
+            <PerStoreLayout>
+              <PerStorePage />
+            </PerStoreLayout>
+          }
+        />
+      </Routes>
+    </ReactQueryProvider>
   )
 }
