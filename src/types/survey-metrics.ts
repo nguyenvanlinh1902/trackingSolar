@@ -73,6 +73,19 @@ export interface AnalyticsMetric {
   changePercent: number;
 }
 
+// Raw conversion data from API
+export interface ConversionStatsData {
+  currency: string;
+  totalOrders: number;
+  totalRevenue: number;
+  inVideoOrders: number;
+  inVideoRevenue: number;
+  postVideoOrders: number;
+  postVideoRevenue: number;
+  totalViews: number;
+  cvr: number;
+}
+
 // Per Store metrics data structure
 export interface PerStoreMetricsData {
   storeId: string;
@@ -91,6 +104,7 @@ export interface PerStoreMetricsData {
     inVideo: RevenueMetrics;
     postVideo: RevenueMetrics;
   };
+  conversionData?: ConversionStatsData;
   topVideos?: Array<{
     videoId: string;
     title: string;

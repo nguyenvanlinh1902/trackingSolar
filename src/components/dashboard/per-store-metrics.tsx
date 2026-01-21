@@ -6,8 +6,9 @@ import { COLORS, RADIUS, SPACING } from '@/lib/constants';
 import {
   VideoSourceChart,
   WidgetMetrics,
+  ConversionOverviewCard,
 } from './per-store';
-import { LoadingSpinner, ErrorMessage, SummaryMetricsGrid } from './shopvid';
+import { LoadingSpinner, ErrorMessage } from './shopvid';
 import { DaybreakChart } from '@/components/dashboard/all-stores';
 import { usePerStoreDaybreak } from '@/hooks/use-per-store-daybreak';
 
@@ -83,41 +84,10 @@ export function PerStoreMetrics({
       {/* Metrics - Only show when store selected and data available */}
       {selectedStoreId && data && !loading && !error && (
         <>
-          {/* Store Name Header */}
-          <div
-            style={{
-              padding: `${SPACING.lg}px ${SPACING.xl}px`,
-              backgroundColor: COLORS.primary + '10',
-              borderRadius: RADIUS.lg,
-              borderLeft: `4px solid ${COLORS.primary}`,
-            }}
-          >
-            <h2
-              style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: COLORS.textPrimary,
-                margin: 0,
-              }}
-            >
-              {data.storeName}
-            </h2>
-            <p
-              style={{
-                fontSize: '13px',
-                color: COLORS.textMuted,
-                marginTop: '4px',
-              }}
-            >
-              Store ID: {data.storeId}
-            </p>
-          </div>
 
-          {/* Summary Metrics (Total Views, Likes, Shares) */}
-          {data.summary && (
-            <div style={{ display: 'grid', gap: '24px' }}>
-              <SummaryMetricsGrid summary={data.summary as any} />
-            </div>
+          {/* Conversion Overview (Raw API Data) */}
+          {data.conversionData && (
+            <ConversionOverviewCard stats={data.conversionData} />
           )}
 
           {/* Widget Usage */}

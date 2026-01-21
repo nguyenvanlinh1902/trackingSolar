@@ -254,6 +254,7 @@ function transformAggregateStatsResponse(data: ApiAggregateStatsResponse): Recor
   
   // Add conversion stats for charts
   const conversionData = {
+    currency: conversionStats?.currency || 'USD',
     totalOrders: conversionStats?.totalOrders || 0,
     totalRevenue: totalRevenue,
     inVideoOrders: conversionStats?.inVideoOrders || 0,
@@ -790,6 +791,20 @@ export async function getPerStoreMetricsByDomain(
     // Parse top videos
     const topVideos = videosData.topVideos?.byViews || videosData.topVideos || [];
 
+    // Parse conversion stats from API response
+    const conversionStats = widgetsData.conversionStats || {};
+    const conversionData = {
+      currency: conversionStats.currency || 'USD',
+      totalOrders: conversionStats.totalOrders || 0,
+      totalRevenue: conversionStats.totalRevenue || 0,
+      inVideoOrders: conversionStats.inVideoOrders || 0,
+      inVideoRevenue: conversionStats.inVideoRevenue || 0,
+      postVideoOrders: conversionStats.postVideoOrders || 0,
+      postVideoRevenue: conversionStats.postVideoRevenue || 0,
+      totalViews: conversionStats.totalViews || 0,
+      cvr: conversionStats.cvr || 0,
+    };
+
     return {
       storeId: domain,
       storeName: fallbackStoreName,
@@ -798,6 +813,7 @@ export async function getPerStoreMetricsByDomain(
       widgetUsage,
       conversion: mockPerStoreMetrics.conversion, // Keep mock for now
       revenue: mockPerStoreMetrics.revenue, // Keep mock for now
+      conversionData,
       topVideos,
     } as unknown as Record<string, unknown>;
   } catch (error) {

@@ -61,7 +61,7 @@ export function VideoSourceChart({ videoSource }: VideoSourceChartProps) {
 
   return (
     <div style={cardStyle}>
-      <h3 style={sectionTitleStyle}>Video Source Distributio1n</h3>
+      <h3 style={sectionTitleStyle}>Video Source Distribution</h3>
 
       <div style={{ display: 'flex', gap: `${SPACING.xl}px`, alignItems: 'center', flexWrap: 'wrap' }}>
         {/* Donut Chart */}

@@ -9,6 +9,8 @@ export { VideoTrend } from './video-trend';
 export { WidgetMetrics } from './widget-metrics';
 export { RevenueCharts } from './revenue-charts';
 export { ConversionMetrics } from './conversion-metrics';
+export { ConversionStatsCard } from './conversion-stats-card';
+export { ConversionOverviewCard } from './conversion-overview-card';
 
 // New modular chart components
 export {
