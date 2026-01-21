@@ -1,5 +1,6 @@
 /**
  * Analytics Service - Integrates with Shopable analytics API
+ * Updated: 2026-01-06 - Fixed per-store widget metrics display
  */
 
 import type {

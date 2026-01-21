@@ -1,10 +1,23 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { ResponsiveLine } from '@nivo/line';
+import { useState, useMemo, CSSProperties } from 'react';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartOptions,
+} from 'chart.js';
 import type { DaybreakAnalytics } from '@/hooks/use-daybreak-analytics';
-import { COLORS, RADIUS, SPACING, formatDate } from '@/lib/constants';
-import { cardStyle } from '@/lib/styles';
+import { COLORS, RADIUS, SPACING, formatDate, formatCurrency } from '@/lib/constants';
+import { glassCardStyle, iconContainerStyle, sectionHeaderStyle, sectionTitleStyle, GRADIENTS } from './shared-styles';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface DaybreakChartProps {
   data: DaybreakAnalytics | null;
@@ -12,236 +25,319 @@ interface DaybreakChartProps {
   onDateRangeChange?: (startDate: string, endDate: string) => void;
 }
 
-const METRIC_COLORS = {
-  orders: '#3b82f6',
-  revenue: '#10b981',
-  views: '#8b5cf6',
-  inVideoOrders: '#f59e0b',
-  postVideoOrders: '#ec4899',
-} as const;
+// Premium Styles
+const styles = {
+  filterRow: {
+    display: 'flex',
+    gap: `${SPACING.lg}px`,
+    marginBottom: `${SPACING.xl}px`,
+    flexWrap: 'wrap',
+    alignItems: 'flex-end',
+  } as CSSProperties,
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  } as CSSProperties,
+  label: {
+    fontSize: '12px',
+    color: COLORS.textMuted,
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  } as CSSProperties,
+  input: {
+    padding: '10px 14px',
+    borderRadius: RADIUS.md,
+    border: `1px solid rgba(255, 255, 255, 0.1)`,
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    background: 'rgba(255, 255, 255, 0.05)',
+    color: COLORS.textPrimary,
+    fontWeight: 500,
+    transition: 'all 0.2s ease',
+  } as CSSProperties,
+  chartWrapper: {
+    height: '420px',
+    position: 'relative',
+    zIndex: 1,
+  } as CSSProperties,
+  emptyState: {
+    height: '380px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: COLORS.textMuted,
+    fontSize: '14px',
+    fontWeight: 500,
+    background: 'rgba(0, 0, 0, 0.02)',
+    borderRadius: RADIUS.md,
+  } as CSSProperties,
+  summaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    gap: `${SPACING.lg}px`,
+    marginBottom: `${SPACING.xl}px`,
+  } as CSSProperties,
+  summaryCard: (color: string): CSSProperties => ({
+    padding: `${SPACING.lg}px`,
+    background: 'rgba(255, 255, 255, 0.05)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    borderRadius: RADIUS.md,
+    borderLeft: `4px solid ${color}`,
+    border: `1px solid rgba(255, 255, 255, 0.1)`,
+    borderLeftWidth: '4px',
+    borderLeftColor: color,
+    transition: 'transform 0.2s ease',
+  }),
+  summaryValue: {
+    fontSize: '20px',
+    fontWeight: 800,
+    color: COLORS.textPrimary,
+    lineHeight: 1,
+    margin: 0,
+  } as CSSProperties,
+  summaryLabel: {
+    fontSize: '11px',
+    color: COLORS.textMuted,
+    marginTop: '6px',
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  } as CSSProperties,
+  chartTypeToggle: {
+    display: 'flex',
+    gap: '8px',
+    marginLeft: 'auto',
+  } as CSSProperties,
+  chartTypeBtn: (isActive: boolean): CSSProperties => ({
+    padding: '8px 16px',
+    fontSize: '13px',
+    borderRadius: RADIUS.md,
+    border: `1px solid ${isActive ? COLORS.primary : 'rgba(255, 255, 255, 0.1)'}`,
+    background: isActive ? `${COLORS.primary}20` : 'rgba(255, 255, 255, 0.05)',
+    color: isActive ? COLORS.primary : COLORS.textSecondary,
+    cursor: 'pointer',
+    fontWeight: 700,
+    transition: 'all 0.2s ease',
+  }),
+};
 
 export function DaybreakChart({ data, loading, onDateRangeChange }: DaybreakChartProps) {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['orders', 'revenue', 'views']);
-  const [dateRange, setDateRange] = useState<{ start: string; end: string }>(() => {
+  const [chartType, setChartType] = useState<'revenue' | 'orders'>('revenue');
+  const [dateRange, setDateRange] = useState(() => {
     const today = new Date();
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return {
-      start: sevenDaysAgo.toISOString().split('T')[0],
+      start: thirtyDaysAgo.toISOString().split('T')[0],
       end: today.toISOString().split('T')[0],
     };
   });
 
-  const lineChartData = useMemo(() => {
-    if (!data?.data || data.data.length === 0) return [];
-
-    const metrics = [
-      { id: 'orders', label: 'Orders', color: METRIC_COLORS.orders, key: 'orders' as const },
-      { id: 'revenue', label: 'Revenue ($)', color: METRIC_COLORS.revenue, key: 'revenue' as const },
-      { id: 'views', label: 'Views', color: METRIC_COLORS.views, key: 'views' as const },
-      { id: 'inVideoOrders', label: 'In-Video Orders', color: METRIC_COLORS.inVideoOrders, key: 'inVideoOrders' as const },
-      { id: 'postVideoOrders', label: 'Post-Video Orders', color: METRIC_COLORS.postVideoOrders, key: 'postVideoOrders' as const },
-    ];
-
-    return metrics
-      .filter((metric) => selectedMetrics.includes(metric.id))
-      .map((metric) => ({
-        id: metric.label,
-        color: metric.color,
-        data: data.data.map((point) => ({
-          x: point.date,
-          y: point[metric.key] || 0,
-        })),
-      }));
-  }, [data, selectedMetrics]);
-
-  const handleMetricToggle = (metricId: string) => {
-    setSelectedMetrics((prev) =>
-      prev.includes(metricId)
-        ? prev.filter((id) => id !== metricId)
-        : [...prev, metricId]
+  // Calculate summary totals
+  const summary = useMemo(() => {
+    if (!data?.data?.length) return null;
+    return data.data.reduce(
+      (acc, point) => ({
+        totalRevenue: acc.totalRevenue + (point.revenue || 0),
+        totalOrders: acc.totalOrders + (point.orders || 0),
+        inVideoRevenue: acc.inVideoRevenue + (point.inVideoRevenue || 0),
+        postVideoRevenue: acc.postVideoRevenue + (point.postVideoRevenue || 0),
+        inVideoOrders: acc.inVideoOrders + (point.inVideoOrders || 0),
+        postVideoOrders: acc.postVideoOrders + (point.postVideoOrders || 0),
+      }),
+      { totalRevenue: 0, totalOrders: 0, inVideoRevenue: 0, postVideoRevenue: 0, inVideoOrders: 0, postVideoOrders: 0 }
     );
-  };
+  }, [data]);
+
+  // Chart.js data configuration
+  const chartData = useMemo(() => {
+    if (!data?.data?.length) return null;
+
+    const labels = data.data.map((point) => formatDate(point.date));
+    const inVideoData = data.data.map((point) =>
+      chartType === 'revenue' ? point.inVideoRevenue || 0 : point.inVideoOrders || 0
+    );
+    const postVideoData = data.data.map((point) =>
+      chartType === 'revenue' ? point.postVideoRevenue || 0 : point.postVideoOrders || 0
+    );
+
+    const barColors = chartType === 'revenue'
+      ? { inVideo: '#f59e0b', postVideo: '#ec4899' }  // Orange, Pink
+      : { inVideo: '#8b5cf6', postVideo: '#06b6d4' };  // Purple, Cyan
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'In-Video',
+          data: inVideoData,
+          backgroundColor: barColors.inVideo,
+          borderColor: barColors.inVideo,
+          borderWidth: 1,
+          borderRadius: 6,
+          barThickness: 24,
+        },
+        {
+          label: 'Post-Video',
+          data: postVideoData,
+          backgroundColor: barColors.postVideo,
+          borderColor: barColors.postVideo,
+          borderWidth: 1,
+          borderRadius: 6,
+          barThickness: 24,
+        },
+      ],
+    };
+  }, [data, chartType]);
+
+  const chartOptions: ChartOptions<'bar'> = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          color: COLORS.textSecondary,
+          font: { size: 13, weight: 600 as const },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'rectRounded' as const,
+        },
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        padding: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y ?? 0;
+            const formatted = chartType === 'revenue' ? formatCurrency(value) : value.toString();
+            return `${label}: ${formatted}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: COLORS.textMuted,
+          font: { size: 11 },
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(255, 255, 255, 0.05)',
+          drawBorder: false,
+        },
+        ticks: {
+          color: COLORS.textMuted,
+          font: { size: 11 },
+          callback: (value) => {
+            return chartType === 'revenue' ? formatCurrency(Number(value)) : value.toString();
+          },
+        },
+      },
+    },
+  }), [chartType]);
 
   const handleDateChange = (field: 'start' | 'end', value: string) => {
     const newRange = { ...dateRange, [field]: value };
     setDateRange(newRange);
-    if (onDateRangeChange) {
-      onDateRangeChange(newRange.start, newRange.end);
-    }
+    onDateRangeChange?.(newRange.start, newRange.end);
   };
 
-  const hasData = lineChartData.length > 0 && lineChartData.some((series) => series.data.length > 0);
+  const hasData = !!chartData;
 
   return (
-    <div style={cardStyle}>
-      <div style={{ marginBottom: `${SPACING.lg}px` }}>
-        <h3
-          style={{
-            fontSize: '16px',
-            fontWeight: 600,
-            color: COLORS.textPrimary,
-            marginBottom: `${SPACING.md}px`,
-          }}
-        >
-          Time Series Analysis (Daybreak)
-        </h3>
+    <div style={glassCardStyle}>
+      {/* Header with icon and toggle */}
+      <div style={sectionHeaderStyle}>
+        <div style={iconContainerStyle(GRADIENTS.orange)}>📈</div>
+        <h3 style={sectionTitleStyle}>Phân tích doanh thu theo ngày</h3>
 
-        {/* Date Range Filters */}
-        <div style={{ display: 'flex', gap: `${SPACING.md}px`, marginBottom: `${SPACING.md}px` }}>
-          <div>
-            <label
-              htmlFor="start-date"
-              style={{
-                display: 'block',
-                fontSize: '12px',
-                color: COLORS.textSecondary,
-                marginBottom: '4px',
-                fontWeight: 500,
-              }}
-            >
-              Start Date
-            </label>
-            <input
-              id="start-date"
-              type="date"
-              value={dateRange.start}
-              onChange={(e) => handleDateChange('start', e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: RADIUS.md,
-                border: `1px solid ${COLORS.border}`,
-                fontSize: '14px',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="end-date"
-              style={{
-                display: 'block',
-                fontSize: '12px',
-                color: COLORS.textSecondary,
-                marginBottom: '4px',
-                fontWeight: 500,
-              }}
-            >
-              End Date
-            </label>
-            <input
-              id="end-date"
-              type="date"
-              value={dateRange.end}
-              onChange={(e) => handleDateChange('end', e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: RADIUS.md,
-                border: `1px solid ${COLORS.border}`,
-                fontSize: '14px',
-                fontFamily: 'inherit',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Metric Toggles */}
-        <div style={{ display: 'flex', gap: `${SPACING.sm}px`, flexWrap: 'wrap' }}>
-          {[
-            { id: 'orders', label: 'Orders', color: METRIC_COLORS.orders },
-            { id: 'revenue', label: 'Revenue', color: METRIC_COLORS.revenue },
-            { id: 'views', label: 'Views', color: METRIC_COLORS.views },
-            { id: 'inVideoOrders', label: 'In-Video Orders', color: METRIC_COLORS.inVideoOrders },
-            { id: 'postVideoOrders', label: 'Post-Video Orders', color: METRIC_COLORS.postVideoOrders },
-          ].map((metric) => (
-            <button
-              key={metric.id}
-              type="button"
-              onClick={() => handleMetricToggle(metric.id)}
-              style={{
-                padding: '6px 12px',
-                fontSize: '12px',
-                borderRadius: RADIUS.md,
-                border: `1px solid ${selectedMetrics.includes(metric.id) ? metric.color : COLORS.border}`,
-                backgroundColor: selectedMetrics.includes(metric.id) ? metric.color + '15' : 'transparent',
-                color: selectedMetrics.includes(metric.id) ? metric.color : COLORS.textSecondary,
-                cursor: 'pointer',
-                fontWeight: 500,
-                transition: 'all 0.2s',
-              }}
-            >
-              {metric.label}
-            </button>
-          ))}
+        {/* Chart type toggle */}
+        <div style={styles.chartTypeToggle}>
+          <button
+            type="button"
+            onClick={() => setChartType('revenue')}
+            style={styles.chartTypeBtn(chartType === 'revenue')}
+          >
+            💰 Doanh thu
+          </button>
+          <button
+            type="button"
+            onClick={() => setChartType('orders')}
+            style={styles.chartTypeBtn(chartType === 'orders')}
+          >
+            📦 Đơn hàng
+          </button>
         </div>
       </div>
 
-      {loading ? (
-        <div
-          style={{
-            height: '350px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: COLORS.textMuted,
-          }}
-        >
-          Loading time series data...
-        </div>
-      ) : hasData ? (
-        <div style={{ height: '350px' }}>
-          <ResponsiveLine
-            data={lineChartData}
-            margin={{ top: 20, right: 24, bottom: 50, left: 60 }}
-            xScale={{ type: 'point' }}
-            yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
-            axisBottom={{
-              tickRotation: -45,
-              format: (value) => (value ? formatDate(String(value)) : ''),
-            }}
-            axisLeft={{
-              tickSize: 0,
-              tickPadding: 8,
-            }}
-            colors={(series) => series.color as string}
-            lineWidth={2}
-            pointSize={6}
-            pointBorderWidth={2}
-            useMesh
-            enableGridX={false}
-            legends={[
-              {
-                anchor: 'top',
-                direction: 'row',
-                justify: false,
-                translateX: 0,
-                translateY: -20,
-                itemsSpacing: 16,
-                itemDirection: 'left-to-right',
-                itemWidth: 120,
-                itemHeight: 20,
-                itemOpacity: 0.9,
-                symbolSize: 10,
-                symbolShape: 'circle',
-              },
-            ]}
+      {/* Premium date filters */}
+      <div style={styles.filterRow}>
+        <div style={styles.inputGroup}>
+          <label htmlFor="start-date" style={styles.label}>Từ ngày</label>
+          <input
+            id="start-date"
+            type="date"
+            value={dateRange.start}
+            onChange={(e) => handleDateChange('start', e.target.value)}
+            style={styles.input}
           />
         </div>
-      ) : (
-        <div
-          style={{
-            height: '350px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: COLORS.textMuted,
-            fontSize: '14px',
-            backgroundColor: COLORS.gray50,
-            borderRadius: RADIUS.md,
-          }}
-        >
-          No time series data available
+        <div style={styles.inputGroup}>
+          <label htmlFor="end-date" style={styles.label}>Đến ngày</label>
+          <input
+            id="end-date"
+            type="date"
+            value={dateRange.end}
+            onChange={(e) => handleDateChange('end', e.target.value)}
+            style={styles.input}
+          />
         </div>
+      </div>
+
+      {/* Premium summary cards */}
+      {summary && !loading && (
+        <div style={styles.summaryGrid}>
+          <div style={styles.summaryCard('#10b981')}>
+            <p style={styles.summaryValue}>{formatCurrency(summary.totalRevenue)}</p>
+            <p style={styles.summaryLabel}>Tổng doanh thu</p>
+          </div>
+          <div style={styles.summaryCard('#3b82f6')}>
+            <p style={styles.summaryValue}>{summary.totalOrders}</p>
+            <p style={styles.summaryLabel}>Tổng đơn hàng</p>
+          </div>
+          <div style={styles.summaryCard('#f59e0b')}>
+            <p style={styles.summaryValue}>{formatCurrency(summary.inVideoRevenue)}</p>
+            <p style={styles.summaryLabel}>In-Video Revenue</p>
+          </div>
+          <div style={styles.summaryCard('#ec4899')}>
+            <p style={styles.summaryValue}>{formatCurrency(summary.postVideoRevenue)}</p>
+            <p style={styles.summaryLabel}>Post-Video Revenue</p>
+          </div>
+        </div>
+      )}
+
+      {/* Chart.js Bar Chart */}
+      {loading ? (
+        <div style={styles.emptyState}>Đang tải dữ liệu...</div>
+      ) : hasData && chartData ? (
+        <div style={styles.chartWrapper}>
+          <Bar data={chartData} options={chartOptions} />
+        </div>
+      ) : (
+        <div style={styles.emptyState}>Không có dữ liệu trong khoảng thời gian này</div>
       )}
     </div>
   );

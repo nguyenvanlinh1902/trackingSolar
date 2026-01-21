@@ -54,42 +54,73 @@ export function useDaybreakAnalytics(startDate?: string, endDate?: string) {
 
 /**
  * Transform API response to daybreak chart format
- * API returns object with numeric keys: { "0": {...}, "1": {...}, "code": 200, "success": true }
+ * API returns: { code, success, message, data: [...] }
  */
 function transformDaybreakResponse(response: Record<string, unknown>): DaybreakAnalytics {
-  // Extract data points from response (API returns object with numeric keys)
   const dataPoints: DaybreakDataPoint[] = [];
-  
-  for (const [key, value] of Object.entries(response)) {
-    // Skip non-numeric keys (code, success, message, etc.)
-    if (!/^\d+$/.test(key)) continue;
-    
-    const point = value as Record<string, unknown>;
-    dataPoints.push({
-      date: (point.date as string) || '',
-      orders: (point.totalOrders as number) || 0,
-      revenue: (point.totalRevenue as number) || 0,
-      views: (point.totalViews as number) || 0,
-      inVideoOrders: (point.inVideoOrders as number) || 0,
-      inVideoRevenue: (point.inVideoRevenue as number) || 0,
-      postVideoOrders: (point.postVideoOrders as number) || 0,
-      postVideoRevenue: (point.postVideoRevenue as number) || 0,
-    });
+
+  // Handle new API format: { data: [...] }
+  const rawData = response.data as Array<Record<string, unknown>> | undefined;
+
+  if (Array.isArray(rawData) && rawData.length > 0) {
+    // Group by date (API có thể trả duplicate dates)
+    const groupedByDate = new Map<string, DaybreakDataPoint>();
+
+    for (const point of rawData) {
+      const date = (point.date as string) || '';
+      const existing = groupedByDate.get(date);
+
+      if (existing) {
+        // Aggregate values for same date
+        existing.orders += (point.totalOrders as number) || 0;
+        existing.revenue += (point.totalRevenue as number) || 0;
+        existing.inVideoOrders = (existing.inVideoOrders ?? 0) + ((point.inVideoOrders as number) || 0);
+        existing.inVideoRevenue = (existing.inVideoRevenue ?? 0) + ((point.inVideoRevenue as number) || 0);
+        existing.postVideoOrders = (existing.postVideoOrders ?? 0) + ((point.postVideoOrders as number) || 0);
+        existing.postVideoRevenue = (existing.postVideoRevenue ?? 0) + ((point.postVideoRevenue as number) || 0);
+      } else {
+        groupedByDate.set(date, {
+          date,
+          orders: (point.totalOrders as number) || 0,
+          revenue: (point.totalRevenue as number) || 0,
+          views: (point.totalViews as number) || 0,
+          inVideoOrders: (point.inVideoOrders as number) || 0,
+          inVideoRevenue: (point.inVideoRevenue as number) || 0,
+          postVideoOrders: (point.postVideoOrders as number) || 0,
+          postVideoRevenue: (point.postVideoRevenue as number) || 0,
+        });
+      }
+    }
+
+    dataPoints.push(...groupedByDate.values());
+  } else {
+    // Legacy format: numeric keys { "0": {...}, "1": {...} }
+    for (const [key, value] of Object.entries(response)) {
+      if (!/^\d+$/.test(key)) continue;
+      const point = value as Record<string, unknown>;
+      dataPoints.push({
+        date: (point.date as string) || '',
+        orders: (point.totalOrders as number) || 0,
+        revenue: (point.totalRevenue as number) || 0,
+        views: (point.totalViews as number) || 0,
+        inVideoOrders: (point.inVideoOrders as number) || 0,
+        inVideoRevenue: (point.inVideoRevenue as number) || 0,
+        postVideoOrders: (point.postVideoOrders as number) || 0,
+        postVideoRevenue: (point.postVideoRevenue as number) || 0,
+      });
+    }
   }
 
-  // If we got data points, return them
   if (dataPoints.length > 0) {
+    const sorted = dataPoints.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     return {
-      data: dataPoints.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-      startDate: dataPoints[0]?.date,
-      endDate: dataPoints[dataPoints.length - 1]?.date,
+      data: sorted,
+      startDate: sorted[0]?.date,
+      endDate: sorted[sorted.length - 1]?.date,
     };
   }
 
-  // Fallback: return mock data if no data points found
-  return {
-    data: generateMockDaybreakData(),
-  };
+  return { data: generateMockDaybreakData() };
 }
 
 /**
