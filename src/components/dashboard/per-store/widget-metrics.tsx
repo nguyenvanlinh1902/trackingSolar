@@ -1,38 +1,84 @@
 'use client';
 
-import { useMemo } from 'react';
-import { ResponsivePie } from '@nivo/pie';
+import { useMemo, useState, CSSProperties } from 'react';
 import type { PerStoreWidgetUsage } from '@/types/survey-metrics';
 import { COLORS, RADIUS, SPACING } from '@/lib/constants';
-import { cardStyle, sectionTitleStyle } from '@/lib/styles';
-
-// Widget type colors
-const WIDGET_TYPE_COLORS = [
-  COLORS.primary,
-  COLORS.secondary,
-  COLORS.success,
-  COLORS.info,
-  COLORS.warning,
-  COLORS.cta,
-] as const;
+import { glassCardStyle, iconContainerStyle, sectionHeaderStyle, sectionTitleStyle, GRADIENTS } from '../all-stores/shared-styles';
+import { WidgetTypesChart } from '../all-stores/widget-types-chart';
+import { CtaActionsGrid } from '../all-stores/cta-actions-grid';
+import { PageDistribution } from '../all-stores/page-distribution';
 
 interface WidgetMetricsProps {
   widgetUsage: PerStoreWidgetUsage;
 }
 
-export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
-  const pieData = useMemo(() => {
-    if (!widgetUsage?.widgetTypes || widgetUsage.widgetTypes.length === 0) {
-      return [];
-    }
-    return widgetUsage.widgetTypes.map((item, index) => ({
-      id: item.type || 'Unknown',
-      label: item.type || 'Unknown',
-      value: Number(item.count) || 0,
-      color: WIDGET_TYPE_COLORS[index % WIDGET_TYPE_COLORS.length],
-    }));
-  }, [widgetUsage?.widgetTypes]);
+// Metric card styles
+const metricCardStyle = (color: string): CSSProperties => ({
+  padding: `${SPACING.lg}px`,
+  borderRadius: RADIUS.lg,
+  background: 'rgba(255, 255, 255, 0.05)',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
+  border: `1px solid rgba(255, 255, 255, 0.1)`,
+  borderLeft: `4px solid ${color}`,
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+});
 
+const metricLabelStyle: CSSProperties = {
+  fontSize: '12px',
+  color: COLORS.textMuted,
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  fontWeight: 700,
+  marginBottom: '8px',
+};
+
+const metricValueStyle: CSSProperties = {
+  fontSize: '32px',
+  fontWeight: 800,
+  color: COLORS.textPrimary,
+  lineHeight: 1,
+};
+
+interface MetricCardProps {
+  label: string;
+  value: string;
+  color: string;
+  gradient: string;
+}
+
+function MetricCard({ label, value, color, gradient }: MetricCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      style={{
+        ...metricCardStyle(color),
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: isHovered
+          ? `0 12px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px ${color}40`
+          : '0 4px 16px rgba(0, 0, 0, 0.1)',
+        borderColor: isHovered ? `${color}80` : 'rgba(255, 255, 255, 0.1)',
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <p style={metricLabelStyle}>{label}</p>
+      <p style={metricValueStyle}>{value}</p>
+      {/* Accent line with gradient */}
+      <div style={{
+        marginTop: '12px',
+        width: isHovered ? '60px' : '48px',
+        height: '4px',
+        background: gradient,
+        borderRadius: '2px',
+        transition: 'width 0.3s ease',
+      }} />
+    </div>
+  );
+}
+
+export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
   const totalWidgets = useMemo(() => {
     if (!widgetUsage?.widgetTypes || widgetUsage.widgetTypes.length === 0) {
       return 0;
@@ -40,308 +86,48 @@ export function WidgetMetrics({ widgetUsage }: WidgetMetricsProps) {
     return widgetUsage.widgetTypes.reduce((sum, item) => sum + (item.count || 0), 0);
   }, [widgetUsage?.widgetTypes]);
 
-  const pageCountsData = useMemo(() => {
-    const productPages = widgetUsage?.productPagesCount || 0;
-    const otherPages = widgetUsage?.otherPagesCount || 0;
-    const total = productPages + otherPages;
-    
-    if (total === 0) {
-      return [];
-    }
-    
-    return [
-      {
-        id: 'Product Pages',
-        label: 'Product Pages',
-        value: productPages,
-        color: COLORS.primary,
-      },
-      {
-        id: 'Other Pages',
-        label: 'Other Pages',
-        value: otherPages,
-        color: COLORS.secondary,
-      },
-    ];
-  }, [widgetUsage?.productPagesCount, widgetUsage?.otherPagesCount]);
-
   return (
-    <div style={cardStyle}>
-      <h3 style={sectionTitleStyle}>Widget Usage</h3>
-
-      <div style={{ display: 'flex', gap: `${SPACING.xl}px`, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        {/* Stats Cards */}
-        <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: `${SPACING.md}px` }}>
-          {/* Total Widgets */}
-          <div
-            style={{
-              padding: `${SPACING.lg}px`,
-              backgroundColor: COLORS.gray50,
-              borderRadius: RADIUS.lg,
-              borderLeft: `4px solid ${COLORS.primary}`,
-            }}
-          >
-            <p
-              style={{
-                fontSize: '13px',
-                color: COLORS.textSecondary,
-                marginBottom: `${SPACING.sm}px`,
-                fontWeight: 500,
-              }}
-            >
-              Total Widgets
-            </p>
-            <p
-              style={{
-                fontSize: '28px',
-                fontWeight: 600,
-                color: COLORS.textPrimary,
-                marginBottom: `${SPACING.sm}px`,
-              }}
-            >
-              {totalWidgets}
-            </p>
-          </div>
-
-          {/* Active Widgets */}
-          <div
-            style={{
-              padding: `${SPACING.lg}px`,
-              backgroundColor: COLORS.gray50,
-              borderRadius: RADIUS.lg,
-              borderLeft: `4px solid ${COLORS.success}`,
-            }}
-          >
-            <p
-              style={{
-                fontSize: '13px',
-                color: COLORS.textSecondary,
-                marginBottom: `${SPACING.sm}px`,
-                fontWeight: 500,
-              }}
-            >
-              Active Widgets
-            </p>
-            <p
-              style={{
-                fontSize: '24px',
-                fontWeight: 600,
-                color: COLORS.textPrimary,
-              }}
-            >
-              {Math.round(widgetUsage.avgActiveWidgetsPerMerchant)}
-            </p>
-          </div>
-
-          {/* Inactive Widgets */}
-          <div
-            style={{
-              padding: `${SPACING.lg}px`,
-              backgroundColor: COLORS.gray50,
-              borderRadius: RADIUS.lg,
-              borderLeft: `4px solid ${COLORS.textMuted}`,
-            }}
-          >
-            <p
-              style={{
-                fontSize: '13px',
-                color: COLORS.textSecondary,
-                marginBottom: `${SPACING.sm}px`,
-                fontWeight: 500,
-              }}
-            >
-              Inactive Widgets
-            </p>
-            <p
-              style={{
-                fontSize: '24px',
-                fontWeight: 600,
-                color: COLORS.textPrimary,
-              }}
-            >
-              {totalWidgets - Math.round(widgetUsage.avgActiveWidgetsPerMerchant)}
-            </p>
-          </div>
-        </div>
-
-        {/* Pie Chart */}
-        <div style={{ flex: '2 1 300px', minWidth: '300px' }}>
-          <p
-            style={{
-              fontSize: '13px',
-              color: COLORS.textSecondary,
-              marginBottom: `${SPACING.sm}px`,
-              fontWeight: 500,
-            }}
-          >
-            Widget Types Distribution
-          </p>
-          {pieData && pieData.length > 0 ? (
-            <div style={{ height: '250px', width: '100%' }}>
-              <ResponsivePie
-                data={pieData}
-                margin={{ top: 10, right: 80, bottom: 10, left: 10 }}
-                innerRadius={0.5}
-                padAngle={2}
-                cornerRadius={3}
-                colors={(datum) => datum.data.color as string}
-                enableArcLabels={false}
-                arcLinkLabelsSkipAngle={10}
-                arcLinkLabelsTextColor={COLORS.textSecondary}
-                arcLinkLabelsThickness={2}
-                arcLinkLabelsColor={{ from: 'color' }}
-                legends={[
-                  {
-                    anchor: 'right',
-                    direction: 'column',
-                    justify: false,
-                    translateX: 24,
-                    translateY: 0,
-                    itemsSpacing: 4,
-                    itemWidth: 100,
-                    itemHeight: 18,
-                    itemTextColor: COLORS.textSecondary,
-                    itemOpacity: 0.9,
-                    symbolSize: 10,
-                    symbolShape: 'circle',
-                    effects: [
-                      {
-                        on: 'hover',
-                        style: {
-                          itemTextColor: COLORS.textPrimary,
-                          itemOpacity: 1,
-                        },
-                      },
-                    ],
-                  },
-                ]}
-              />
-            </div>
-          ) : (
-            <div
-              style={{
-                height: '250px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: COLORS.textMuted,
-                fontSize: '14px',
-              }}
-            >
-              No widget types data available
-            </div>
-          )}
-        </div>
+    <div style={glassCardStyle}>
+      <div style={sectionHeaderStyle}>
+        <div style={iconContainerStyle(GRADIENTS.green)}>🎛️</div>
+        <h3 style={sectionTitleStyle}>Widget Usage</h3>
       </div>
 
-      {/* Page Counts Chart */}
-      {(widgetUsage?.productPagesCount !== undefined || widgetUsage?.otherPagesCount !== undefined) && 
-       pageCountsData.length > 0 && (
-        <div style={{ marginTop: `${SPACING.xl}px` }}>
-          <h4
-            style={{
-              fontSize: '14px',
-              fontWeight: 600,
-              color: COLORS.textPrimary,
-              marginBottom: `${SPACING.md}px`,
-            }}
-          >
-            Page Distribution
-          </h4>
-          <div style={{ display: 'flex', gap: `${SPACING.xl}px`, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            {/* Stats Cards */}
-            <div style={{ flex: '1 1 200px', display: 'flex', gap: `${SPACING.md}px` }}>
-              <div
-                style={{
-                  flex: 1,
-                  padding: `${SPACING.lg}px`,
-                  backgroundColor: COLORS.gray50,
-                  borderRadius: RADIUS.lg,
-                  borderLeft: `4px solid ${COLORS.primary}`,
-                  textAlign: 'center',
-                }}
-              >
-                <p style={{ fontSize: '13px', color: COLORS.textSecondary, marginBottom: `${SPACING.xs}px` }}>
-                  Product Pages
-                </p>
-                <p style={{ fontSize: '24px', fontWeight: 600, color: COLORS.textPrimary }}>
-                  {widgetUsage.productPagesCount || 0}
-                </p>
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  padding: `${SPACING.lg}px`,
-                  backgroundColor: COLORS.gray50,
-                  borderRadius: RADIUS.lg,
-                  borderLeft: `4px solid ${COLORS.secondary}`,
-                  textAlign: 'center',
-                }}
-              >
-                <p style={{ fontSize: '13px', color: COLORS.textSecondary, marginBottom: `${SPACING.xs}px` }}>
-                  Other Pages
-                </p>
-                <p style={{ fontSize: '24px', fontWeight: 600, color: COLORS.textPrimary }}>
-                  {widgetUsage.otherPagesCount || 0}
-                </p>
-              </div>
-            </div>
-          </div>
+      <div style={{ display: 'flex', gap: `${SPACING['2xl']}px`, flexWrap: 'wrap' }}>
+        {/* Premium stats cards */}
+        <div style={{ flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: `${SPACING.lg}px` }}>
+          <MetricCard
+            label="Total Widgets"
+            value={totalWidgets.toString()}
+            color={COLORS.primary}
+            gradient={GRADIENTS.blue}
+          />
+          <MetricCard
+            label="Avg Widgets/Store"
+            value={widgetUsage.avgWidgetsPerMerchant.toFixed(1)}
+            color={COLORS.success}
+            gradient={GRADIENTS.green}
+          />
+          <MetricCard
+            label="Avg Active/Store"
+            value={widgetUsage.avgActiveWidgetsPerMerchant.toFixed(1)}
+            color={COLORS.info}
+            gradient={GRADIENTS.cyan}
+          />
         </div>
-      )}
+
+        {/* Premium chart */}
+        <WidgetTypesChart widgetTypes={widgetUsage.widgetTypes} />
+      </div>
+
+      {/* Page Distribution */}
+      <PageDistribution
+        productPagesCount={widgetUsage.productPagesCount || 0}
+        otherPagesCount={widgetUsage.otherPagesCount || 0}
+      />
 
       {/* CTA Actions */}
-      {widgetUsage.ctaActions && widgetUsage.ctaActions.length > 0 && (
-        <div style={{ marginTop: `${SPACING.xl}px` }}>
-          <p
-            style={{
-              fontSize: '13px',
-              color: COLORS.textSecondary,
-              marginBottom: `${SPACING.md}px`,
-              fontWeight: 500,
-            }}
-          >
-            CTA Actions
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: `${SPACING.md}px` }}>
-            {widgetUsage.ctaActions.map((action, index) => {
-              const total = action.count ?? (action.desktop + action.mobile);
-              return (
-                <div
-                  key={index}
-                  style={{
-                    padding: `${SPACING.md}px ${SPACING.lg}px`,
-                    backgroundColor: COLORS.gray50,
-                    borderRadius: RADIUS.md,
-                    fontSize: '13px',
-                  }}
-                >
-                  <p style={{ color: COLORS.textSecondary, marginBottom: `${SPACING.xs}px`, fontWeight: 500 }}>
-                    {action.action}
-                  </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: `${SPACING.md}px` }}>
-                      <div>
-                        <span style={{ fontSize: '11px', color: COLORS.textMuted }}>Desktop: </span>
-                        <span style={{ color: COLORS.textPrimary, fontWeight: 600 }}>{action.desktop}</span>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: '11px', color: COLORS.textMuted }}>Mobile: </span>
-                        <span style={{ color: COLORS.textPrimary, fontWeight: 600 }}>{action.mobile}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '12px', color: COLORS.textSecondary, fontWeight: 600 }}>
-                        Total: {total}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <CtaActionsGrid ctaActions={widgetUsage.ctaActions} />
     </div>
   );
 }
