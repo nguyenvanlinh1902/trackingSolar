@@ -70,9 +70,9 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                backgroundColor: isAnalyticsPage ? 'rgba(255,255,255,0.2)' : 'transparent',
-                color: '#ffffff',
-                transition: 'background-color 0.2s',
+                backgroundColor: isAnalyticsPage ? '#667eea' : 'transparent',
+                color: isAnalyticsPage ? '#ffffff' : '#6b7280',
+                transition: 'all 0.2s',
               }}
             >
               All Stores
@@ -86,9 +86,9 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                backgroundColor: isPerStorePage ? 'rgba(255,255,255,0.2)' : 'transparent',
-                color: '#ffffff',
-                transition: 'background-color 0.2s',
+                backgroundColor: isPerStorePage ? '#667eea' : 'transparent',
+                color: isPerStorePage ? '#ffffff' : '#6b7280',
+                transition: 'all 0.2s',
               }}
             >
               Per Store
