@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface DashboardHeaderProps {
   title: string;
@@ -25,7 +24,6 @@ export function DashboardHeader({
   onSearch,
   searchLoading = false,
 }: DashboardHeaderProps) {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,19 +106,19 @@ export function DashboardHeader({
         )}
       </div>
 
-      {/* Right Section: Search (Per Store only) + Navigation */}
-      <div style={{
-        display: 'flex',
-        gap: '24px',
-        alignItems: 'center',
-        position: 'relative',
-        zIndex: 1,
-        flex: '1 1 auto',
-        justifyContent: 'flex-end',
-        flexWrap: 'wrap',
-      }}>
-        {/* Store Search - Per Store only */}
-        {currentPage === 'per-store' && onSearch && (
+      {/* Right Section: Search (Per Store only) */}
+      {currentPage === 'per-store' && onSearch && (
+        <div style={{
+          display: 'flex',
+          gap: '24px',
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 1,
+          flex: '1 1 auto',
+          justifyContent: 'flex-end',
+          flexWrap: 'wrap',
+        }}>
+          {/* Store Search */}
           <div style={{ minWidth: '320px', maxWidth: '400px', width: '100%' }}>
             {/* Input field with Search button */}
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -225,11 +223,8 @@ export function DashboardHeader({
               </div>
             )}
           </div>
-        )}
-
-        {/* Navigation Buttons */}
-        <NavigationButtons navigate={navigate} currentPage={currentPage} />
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -269,73 +264,6 @@ function TotalShopsCard({ value }: { value: number }) {
       <p style={{ margin: '8px 0 0', fontSize: '36px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>
         {value}
       </p>
-    </div>
-  );
-}
-
-function NavigationButtons({ navigate, currentPage }: { navigate: (path: string) => void; currentPage: string }) {
-  const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
-
-  return (
-    <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
-      <button
-        type="button"
-        onClick={() => navigate('/dashboard/analytics')}
-        onMouseEnter={() => setHoveredBtn('all')}
-        onMouseLeave={() => setHoveredBtn(null)}
-        style={{
-          padding: '12px 24px',
-          fontSize: '14px',
-          fontWeight: 700,
-          borderRadius: '999px',
-          border: currentPage === 'all-stores' ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
-          cursor: 'pointer',
-          background: currentPage === 'all-stores'
-            ? 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)'
-            : hoveredBtn === 'all'
-            ? 'rgba(255, 255, 255, 0.15)'
-            : 'rgba(255, 255, 255, 0.08)',
-          color: 'rgba(255, 255, 255, 0.95)',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          transform: hoveredBtn === 'all' ? 'translateY(-2px)' : 'translateY(0)',
-          boxShadow: currentPage === 'all-stores'
-            ? '0 8px 20px rgba(37, 99, 235, 0.5)'
-            : hoveredBtn === 'all'
-            ? '0 4px 12px rgba(0, 0, 0, 0.15)'
-            : 'none',
-        }}
-      >
-        All Stores
-      </button>
-      <button
-        type="button"
-        onClick={() => navigate('/dashboard/per-store')}
-        onMouseEnter={() => setHoveredBtn('per')}
-        onMouseLeave={() => setHoveredBtn(null)}
-        style={{
-          padding: '12px 24px',
-          fontSize: '14px',
-          fontWeight: 700,
-          borderRadius: '999px',
-          border: currentPage === 'per-store' ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
-          cursor: 'pointer',
-          background: currentPage === 'per-store'
-            ? 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)'
-            : hoveredBtn === 'per'
-            ? 'rgba(255, 255, 255, 0.15)'
-            : 'rgba(255, 255, 255, 0.08)',
-          color: 'rgba(255, 255, 255, 0.95)',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          transform: hoveredBtn === 'per' ? 'translateY(-2px)' : 'translateY(0)',
-          boxShadow: currentPage === 'per-store'
-            ? '0 8px 20px rgba(37, 99, 235, 0.5)'
-            : hoveredBtn === 'per'
-            ? '0 4px 12px rgba(0, 0, 0, 0.15)'
-            : 'none',
-        }}
-      >
-        Per Store
-      </button>
     </div>
   );
 }
