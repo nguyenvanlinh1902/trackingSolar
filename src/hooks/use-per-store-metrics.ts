@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { getPerStoreMetricsByDomain } from '@/services/analytics-service';
+import type { PerStoreMetricsData } from '@/types/survey-metrics';
 
 interface UsePerStoreMetricsReturn {
-  data: any | null;
+  data: PerStoreMetricsData | null;
   loading: boolean;
   error: string | null;
   searchByDomain: (shopId: string, startDate?: string, endDate?: string) => Promise<void>;
@@ -17,7 +18,7 @@ interface UsePerStoreMetricsReturn {
  * - Optional date range filtering
  */
 export function usePerStoreMetrics(): UsePerStoreMetricsReturn {
-  const [data, setData] = useState<any | null>(null);
+  const [data, setData] = useState<PerStoreMetricsData | null>(null);
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -35,7 +36,7 @@ export function usePerStoreMetrics(): UsePerStoreMetricsReturn {
       return await getPerStoreMetricsByDomain(shopId.trim(), startDate, endDate);
     },
     onSuccess: (result) => {
-      setData(result);
+      setData(result as unknown as PerStoreMetricsData);
     },
     onError: () => {
       setData(null);

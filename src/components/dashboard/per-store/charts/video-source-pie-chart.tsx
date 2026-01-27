@@ -10,6 +10,7 @@ const VIDEO_SOURCE_COLORS = {
   tiktok: '#FF0050',
   instagram: '#E4405F',
   upload: COLORS.primary,
+  shopify: '#95BF47',
 } as const;
 
 interface VideoSourcePieChartProps {
@@ -70,12 +71,14 @@ function useChartData(data: VideoSourceMetrics | null) {
     const tiktok = data.tiktok ?? 0;
     const instagram = data.instagram ?? 0;
     const upload = data.upload ?? 0;
-    const total = data.total ?? tiktok + instagram + upload;
+    const shopify = data.shopify ?? 0;
+    const total = data.total ?? tiktok + instagram + upload + shopify;
 
     const pieData = [
       { key: 'tiktok', name: 'TikTok', value: tiktok, color: VIDEO_SOURCE_COLORS.tiktok },
       { key: 'instagram', name: 'Instagram', value: instagram, color: VIDEO_SOURCE_COLORS.instagram },
       { key: 'upload', name: 'Direct Upload', value: upload, color: VIDEO_SOURCE_COLORS.upload },
+      { key: 'shopify', name: 'Shopify', value: shopify, color: VIDEO_SOURCE_COLORS.shopify },
     ].filter((item) => item.value > 0);
 
     return { pieData, total };
@@ -158,6 +161,7 @@ export function VideoSourcePieChart({ data, loading }: VideoSourcePieChartProps)
             <StatRow label="TikTok" value={data?.tiktok ?? 0} color={VIDEO_SOURCE_COLORS.tiktok} />
             <StatRow label="Instagram" value={data?.instagram ?? 0} color={VIDEO_SOURCE_COLORS.instagram} />
             <StatRow label="Direct Upload" value={data?.upload ?? 0} color={VIDEO_SOURCE_COLORS.upload} />
+            <StatRow label="Shopify" value={data?.shopify ?? 0} color={VIDEO_SOURCE_COLORS.shopify} />
           </div>
         </div>
       </div>

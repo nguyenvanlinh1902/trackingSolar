@@ -87,7 +87,43 @@ interface ApiAggregateStatsResponse {
     tiktok: number;
     instagram: number;
     import: number;
+    shopify?: number;
     total: number;
+    totalImported?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+    totalFileSize?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+  };
+  uploadStats?: {
+    successful?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+    failed?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+    successfulWithDuration?: number;
+    totalUploadTime?: number;
+    avgUploadTime?: number;
+    uploadTimeByType?: Record<string, { count: number; totalTime: number }>;
+    avgUploadTimeByType?: Record<string, number>;
   };
   widgetStats?: {
     totalWidgets: number;
@@ -159,6 +195,7 @@ function transformAggregateStatsResponse(data: ApiAggregateStatsResponse): Recor
     tiktok: videoStats?.tiktok || 0,
     instagram: videoStats?.instagram || 0,
     upload: videoStats?.import || 0, // API returns 'import', we map to 'upload'
+    shopify: videoStats?.shopify || 0,
     total: videoStats?.total || 0,
   };
   
@@ -273,6 +310,8 @@ function transformAggregateStatsResponse(data: ApiAggregateStatsResponse): Recor
     chartData: [],
     topVideos: [],
     totalShops: data.totalShops,
+    videoStats: data.videoStats,
+    uploadStats: data.uploadStats,
     updatedAt: data.updatedAt,
   };
 }
@@ -319,7 +358,8 @@ export async function getAggregateStats(
         tiktok: 450,
         instagram: 350,
         upload: 200,
-        total: 1000,
+        shopify: 100,
+        total: 1100,
       },
     } as unknown as Record<string, unknown>;
   }
@@ -425,7 +465,8 @@ const mockPerStoreMetrics: Omit<PerStoreMetricsData, 'storeId' | 'storeName'> = 
     tiktok: 150,
     instagram: 120,
     upload: 80,
-    total: 350,
+    shopify: 50,
+    total: 400,
   },
   widgetUsage: {
     widgetTypes: [
@@ -746,7 +787,8 @@ export async function getPerStoreMetricsByDomain(
       tiktok: platformCounts.tiktok || 0,
       instagram: platformCounts.instagram || 0,
       upload: platformCounts.import || 0,
-      total: (platformCounts.tiktok || 0) + (platformCounts.instagram || 0) + (platformCounts.import || 0),
+      shopify: platformCounts.shopify || 0,
+      total: (platformCounts.tiktok || 0) + (platformCounts.instagram || 0) + (platformCounts.import || 0) + (platformCounts.shopify || 0),
     };
 
     // Parse summary from videos data
@@ -889,7 +931,8 @@ const mockSurveyMetrics: SurveyMetricsData = {
     tiktok: 450,
     instagram: 350,
     upload: 200,
-    total: 1000,
+    shopify: 100,
+    total: 1100,
   },
   widgetUsage: {
     widgetTypes: [

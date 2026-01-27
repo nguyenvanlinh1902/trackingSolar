@@ -11,7 +11,43 @@ export interface AllStoresApiResponse {
     tiktok: number;
     instagram: number;
     import: number;
+    shopify?: number;
     total: number;
+    totalImported?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+    totalFileSize?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+  };
+  uploadStats?: {
+    successful?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+    failed?: {
+      tiktok: number;
+      instagram: number;
+      import: number;
+      shopify: number;
+      total: number;
+    };
+    successfulWithDuration?: number;
+    totalUploadTime?: number;
+    avgUploadTime?: number;
+    uploadTimeByType?: Record<string, { count: number; totalTime: number }>;
+    avgUploadTimeByType?: Record<string, number>;
   };
   widgetStats?: {
     totalWidgets: number;
@@ -56,6 +92,8 @@ export interface AllStoresMetricsData {
   videoSource: VideoSourceMetrics;
   widgetUsage: WidgetUsageMetrics;
   totalShops: number;
+  videoStats?: AllStoresApiResponse['videoStats'];
+  uploadStats?: AllStoresApiResponse['uploadStats'];
   updatedAt?: Record<string, unknown>;
 }
 

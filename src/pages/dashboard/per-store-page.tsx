@@ -1,14 +1,24 @@
 'use client';
 
 import { ProtectedRoute } from '@/components/auth/protected-route';
-import { usePerStoreMetrics } from '@/hooks/use-per-store-metrics';
 import { PerStoreMetrics } from '@/components/dashboard/per-store-metrics';
 import { COLORS } from '@/lib/constants';
 import { pageContainerStyle } from '@/lib/styles';
+import type { PerStoreMetricsData } from '@/types/survey-metrics';
 
-export default function PerStorePage() {
-  const { data, loading, error } = usePerStoreMetrics();
+interface PerStorePageProps {
+  data?: PerStoreMetricsData | null;
+  loading?: boolean;
+  error?: string | null;
+  selectedStoreId?: string | null;
+}
 
+export default function PerStorePage({
+  data = null,
+  loading = false,
+  error = null,
+  selectedStoreId = null
+}: PerStorePageProps) {
   return (
     <ProtectedRoute>
       <main style={{ backgroundColor: COLORS.background, minHeight: '100vh' }}>
@@ -16,7 +26,7 @@ export default function PerStorePage() {
           {/* Per Store Metrics */}
           <PerStoreMetrics
             data={data}
-            selectedStoreId={null}
+            selectedStoreId={selectedStoreId}
             loading={loading}
             error={error}
           />

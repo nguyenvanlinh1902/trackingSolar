@@ -26,6 +26,7 @@ export interface VideoSourceMetrics {
   tiktok: number;
   instagram: number;
   upload: number;
+  shopify: number;
   total: number;
 }
 

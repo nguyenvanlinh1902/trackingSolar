@@ -1,10 +1,10 @@
+import React, { useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Navigation } from './components/navigation'
 import HomePage from './pages/home-page'
 import LoginPage from './pages/login-page'
 import AnalyticsPage from './pages/dashboard/analytics-page'
 import PerStorePage from './pages/dashboard/per-store-page'
-import { useState } from 'react'
 import { useAllStoresContext } from './contexts/all-stores-context'
 import { usePerStoreMetrics } from './hooks/use-per-store-metrics'
 import { ReactQueryProvider } from './lib/react-query'
@@ -25,7 +25,7 @@ function AnalyticsLayout({ children }: { children: React.ReactNode }) {
 
 function PerStoreLayout({ children }: { children: React.ReactNode }) {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null)
-  const { searchByDomain, loading } = usePerStoreMetrics()
+  const { data, loading, error, searchByDomain } = usePerStoreMetrics()
 
   const handleSearch = async (domain: string) => {
     setSelectedDomain(domain)
@@ -41,7 +41,7 @@ function PerStoreLayout({ children }: { children: React.ReactNode }) {
         onSearch={handleSearch}
         searchLoading={loading}
       />
-      {children}
+      {React.cloneElement(children as React.ReactElement, { data, loading, error, selectedStoreId: selectedDomain })}
     </>
   )
 }

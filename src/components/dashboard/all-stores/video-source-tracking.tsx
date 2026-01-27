@@ -20,26 +20,29 @@ const VIDEO_COLORS = {
   tiktok: '#FF0050',
   instagram: '#E4405F',
   upload: COLORS.primary,
+  shopify: '#95BF47',
 } as const;
 
 export function VideoSourceMetrics() {
   const { data } = useAllStoresContext();
   const videoSource = data?.videoSource;
   const { pieData, percentages } = useMemo(() => {
-    if (!videoSource) return { pieData: [], percentages: { tiktok: 0, instagram: 0, upload: 0 } };
+    if (!videoSource) return { pieData: [], percentages: { tiktok: 0, instagram: 0, upload: 0, shopify: 0 } };
 
-    const total = videoSource.total || (videoSource.tiktok + videoSource.instagram + videoSource.upload);
+    const total = videoSource.total || (videoSource.tiktok + videoSource.instagram + videoSource.upload + (videoSource.shopify || 0));
 
     const pie = [
       { key: 'tiktok', name: 'TikTok sync', value: videoSource.tiktok || 0, color: VIDEO_COLORS.tiktok },
       { key: 'instagram', name: 'Instagram sync', value: videoSource.instagram || 0, color: VIDEO_COLORS.instagram },
       { key: 'upload', name: 'Direct Upload', value: videoSource.upload || 0, color: VIDEO_COLORS.upload },
+      { key: 'shopify', name: 'Shopify sync', value: videoSource.shopify || 0, color: VIDEO_COLORS.shopify },
     ].filter(item => item.value > 0);
 
     const pct = {
       tiktok: total > 0 ? (videoSource.tiktok / total) * 100 : 0,
       instagram: total > 0 ? (videoSource.instagram / total) * 100 : 0,
       upload: total > 0 ? (videoSource.upload / total) * 100 : 0,
+      shopify: total > 0 ? ((videoSource.shopify || 0) / total) * 100 : 0,
     };
 
     return { pieData: pie, percentages: pct };
@@ -135,6 +138,12 @@ export function VideoSourceMetrics() {
             percentage={percentages.upload}
             count={videoSource.upload}
             color={VIDEO_COLORS.upload}
+          />
+          <SourceMetricCard
+            label="Shopify sync"
+            percentage={percentages.shopify}
+            count={videoSource.shopify || 0}
+            color={VIDEO_COLORS.shopify}
           />
         </div>
       </div>
