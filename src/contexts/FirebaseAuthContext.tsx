@@ -80,8 +80,24 @@ export function FirebaseAuthProvider({ children }: FirebaseAuthProviderProps) {
     try {
       setLoading(true);
       setError(null);
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+
+      // Validate email domain - only allow @avada.io emails
+      const userEmail = result.user?.email;
+      if (!userEmail || !userEmail.endsWith('@avada.io')) {
+        await firebaseSignOut(auth);
+        const errorMsg = 'Access denied. Only @avada.io email addresses are allowed.';
+        setError(errorMsg);
+        throw new Error(errorMsg);
+      }
     } catch (err) {
+      // Check if it's our custom domain error first
+      if (err instanceof Error && err.message.includes('Access denied')) {
+        setError(err.message);
+        throw err;
+      }
+
+      // Otherwise, handle as Firebase auth error
       const authError = err as AuthError;
       const friendlyMessage = getAuthErrorMessage(authError);
       setError(friendlyMessage);
