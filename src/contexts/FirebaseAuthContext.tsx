@@ -84,9 +84,9 @@ export function FirebaseAuthProvider({ children }: FirebaseAuthProviderProps) {
 
       // Validate email domain - only allow @avada.io emails
       const userEmail = result.user?.email;
-      if (!userEmail || !userEmail.endsWith('@avada.io')) {
+      if (!userEmail || !userEmail.endsWith('@avadagroup.com')) {
         await firebaseSignOut(auth);
-        const errorMsg = 'Access denied. Only @avada.io email addresses are allowed.';
+        const errorMsg = 'Access denied. Only @avadagroup.com email addresses are allowed.';
         setError(errorMsg);
         throw new Error(errorMsg);
       }
